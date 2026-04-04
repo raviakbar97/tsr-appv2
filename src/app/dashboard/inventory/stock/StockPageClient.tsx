@@ -30,7 +30,7 @@ export default function StockPageClient({ skus }: StockPageClientProps) {
             const sku = skus.find((s) => s.id === e.target.value)
             setSelectedSku(sku ?? null)
           }}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           defaultValue=""
         >
           <option value="" disabled>

@@ -16,7 +16,7 @@ export default async function SKUDetailPage({ params }: Props) {
     await Promise.all([
       supabase
         .from('skus')
-        .select(`*, sku_variations(*), sku_fees(fee_id, fees(*))`)
+        .select(`*, sku_variations(*), sku_fees(fee_id, value, max_value, fees(*))`)
         .eq('id', id)
         .single(),
       supabase.from('fees').select('*').eq('is_active', true).order('name'),

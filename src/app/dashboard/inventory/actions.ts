@@ -8,12 +8,18 @@ interface VariationInput {
   base_price_override: number | null
 }
 
+interface FeeInput {
+  fee_id: string
+  value: number
+  max_value: number | null
+}
+
 export async function createSKU(formData: {
   name: string
   sku_code: string
   base_price: number
   variations: VariationInput[]
-  fee_ids: string[]
+  fees: FeeInput[]
 }) {
   const supabase = await createClient()
 
@@ -46,11 +52,13 @@ export async function createSKU(formData: {
     if (varError) return { error: varError.message }
   }
 
-  // Assign fees
-  if (formData.fee_ids.length > 0) {
-    const fees = formData.fee_ids.map((fee_id) => ({
+  // Assign fees with values
+  if (formData.fees.length > 0) {
+    const fees = formData.fees.map((f) => ({
       sku_id: sku.id,
-      fee_id,
+      fee_id: f.fee_id,
+      value: f.value,
+      max_value: f.max_value,
     }))
     const { error: feeError } = await supabase.from('sku_fees').insert(fees)
     if (feeError) return { error: feeError.message }
@@ -68,7 +76,7 @@ export async function updateSKU(
     base_price: number
     is_active: boolean
     variations: VariationInput[]
-    fee_ids: string[]
+    fees: FeeInput[]
   }
 ) {
   const supabase = await createClient()
@@ -102,12 +110,14 @@ export async function updateSKU(
     if (varError) return { error: varError.message }
   }
 
-  // Replace fee assignments
+  // Replace fee assignments with values
   await supabase.from('sku_fees').delete().eq('sku_id', id)
-  if (formData.fee_ids.length > 0) {
-    const fees = formData.fee_ids.map((fee_id) => ({
+  if (formData.fees.length > 0) {
+    const fees = formData.fees.map((f) => ({
       sku_id: id,
-      fee_id,
+      fee_id: f.fee_id,
+      value: f.value,
+      max_value: f.max_value,
     }))
     const { error: feeError } = await supabase.from('sku_fees').insert(fees)
     if (feeError) return { error: feeError.message }

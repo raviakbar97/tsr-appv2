@@ -9,7 +9,7 @@ import StockForm from './StockForm'
 interface Fee {
   id: string
   name: string
-  percentage: number
+  fee_type: 'fixed' | 'percentage'
   is_active: boolean
 }
 
@@ -26,7 +26,7 @@ interface SKU {
   base_price: number
   is_active: boolean
   sku_variations: Variation[]
-  sku_fees: { fee_id: string; fees: Fee }[]
+  sku_fees: { fee_id: string; value: number; max_value: number | null; fees: Fee }[]
 }
 
 interface StockRow {
@@ -58,7 +58,12 @@ export default function SKUDetailView({ sku, fees, stockRows, transactions }: SK
   const [showEdit, setShowEdit] = useState(false)
   const [showStockForm, setShowStockForm] = useState(false)
 
-  const totalFeePercent = sku.sku_fees.reduce((sum, f) => sum + f.fees.percentage, 0)
+  const totalFeePercent = sku.sku_fees
+    .filter((f) => f.fees.fee_type === 'percentage')
+    .reduce((sum, f) => sum + f.value, 0)
+  const totalFixedFees = sku.sku_fees
+    .filter((f) => f.fees.fee_type === 'fixed')
+    .reduce((sum, f) => sum + f.value, 0)
   const totalStock = stockRows.reduce((sum, r) => sum + r.current_quantity, 0)
 
   return (
@@ -147,7 +152,17 @@ export default function SKUDetailView({ sku, fees, stockRows, transactions }: SK
         {/* Fees */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-sm font-semibold text-gray-900 mb-3">
-            Assigned Fees (Total: {totalFeePercent}%)
+            Assigned Fees
+            {totalFeePercent > 0 && (
+              <span className="text-xs font-normal text-purple-600 ml-1">
+                ({totalFeePercent}% total percentage)
+              </span>
+            )}
+            {totalFixedFees > 0 && (
+              <span className="text-xs font-normal text-amber-600 ml-1">
+                (+ Rp {totalFixedFees.toLocaleString('id-ID')} total fixed)
+              </span>
+            )}
           </h2>
           {sku.sku_fees.length === 0 ? (
             <p className="text-sm text-gray-400">No fees assigned</p>
@@ -155,8 +170,19 @@ export default function SKUDetailView({ sku, fees, stockRows, transactions }: SK
             <div className="space-y-2">
               {sku.sku_fees.map((f) => (
                 <div key={f.fee_id} className="flex justify-between text-sm">
-                  <span className="text-gray-900">{f.fees.name}</span>
-                  <span className="text-gray-600">{f.fees.percentage}%</span>
+                  <span className="text-gray-900">
+                    {f.fees.name}
+                    <span className={`ml-1 text-xs ${
+                      f.fees.fee_type === 'percentage' ? 'text-purple-600' : 'text-amber-600'
+                    }`}>
+                      ({f.fees.fee_type === 'percentage' ? '%' : 'IDR'})
+                    </span>
+                  </span>
+                  <span className="text-gray-600">
+                    {f.fees.fee_type === 'percentage'
+                      ? `${f.value}%${f.max_value ? ` (max Rp ${Number(f.max_value).toLocaleString('id-ID')})` : ''}`
+                      : `Rp ${Number(f.value).toLocaleString('id-ID')}`}
+                  </span>
                 </div>
               ))}
             </div>

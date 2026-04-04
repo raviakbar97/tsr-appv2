@@ -7,7 +7,7 @@ import { X } from 'lucide-react'
 interface Fee {
   id: string
   name: string
-  percentage: number
+  fee_type: 'fixed' | 'percentage'
   is_active: boolean
 }
 
@@ -18,7 +18,7 @@ interface FeeFormProps {
 
 export default function FeeForm({ fee, onClose }: FeeFormProps) {
   const [name, setName] = useState(fee?.name ?? '')
-  const [percentage, setPercentage] = useState(fee?.percentage?.toString() ?? '')
+  const [feeType, setFeeType] = useState<'fixed' | 'percentage'>(fee?.fee_type ?? 'percentage')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const isEdit = !!fee
@@ -30,7 +30,7 @@ export default function FeeForm({ fee, onClose }: FeeFormProps) {
 
     const formData = new FormData()
     formData.set('name', name)
-    formData.set('percentage', percentage)
+    formData.set('fee_type', feeType)
 
     const result = isEdit
       ? await updateFee(fee.id, formData)
@@ -65,7 +65,7 @@ export default function FeeForm({ fee, onClose }: FeeFormProps) {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="e.g. Commission, Shipping Fee"
               required
             />
@@ -73,19 +73,38 @@ export default function FeeForm({ fee, onClose }: FeeFormProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Percentage (%)
+              Fee Type
             </label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              max="100"
-              value={percentage}
-              onChange={(e) => setPercentage(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g. 5.00"
-              required
-            />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setFeeType('percentage')}
+                className={`flex-1 py-2.5 rounded-lg text-sm font-medium border ${
+                  feeType === 'percentage'
+                    ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Percentage (%)
+              </button>
+              <button
+                type="button"
+                onClick={() => setFeeType('fixed')
+              }
+                className={`flex-1 py-2.5 rounded-lg text-sm font-medium border ${
+                  feeType === 'fixed'
+                    ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Fixed Rate (IDR)
+              </button>
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              {feeType === 'percentage'
+                ? 'Value (% of selling price) will be set per SKU'
+                : 'Fixed amount (IDR) will be set per SKU'}
+            </p>
           </div>
 
           {error && (

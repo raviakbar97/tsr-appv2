@@ -51,7 +51,7 @@ export default function SKUVariations({ variations, onChange }: SKUVariationsPro
                 value={v.variation_name}
                 onChange={(e) => updateVariation(i, 'variation_name', e.target.value)}
                 placeholder="Variation name"
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
               <input
@@ -61,7 +61,7 @@ export default function SKUVariations({ variations, onChange }: SKUVariationsPro
                 value={v.base_price_override}
                 onChange={(e) => updateVariation(i, 'base_price_override', e.target.value)}
                 placeholder="Price override (optional)"
-                className="w-40 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-40 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
                 type="button"

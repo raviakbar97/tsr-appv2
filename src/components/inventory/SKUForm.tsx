@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { X } from 'lucide-react'
 import { createSKU, updateSKU } from '@/app/dashboard/inventory/actions'
 import SKUVariations from './SKUVariations'
@@ -9,7 +9,7 @@ import SKUFeeAssignment from './SKUFeeAssignment'
 interface Fee {
   id: string
   name: string
-  percentage: number
+  fee_type: 'fixed' | 'percentage'
   is_active: boolean
 }
 
@@ -19,6 +19,13 @@ interface Variation {
   base_price_override: number | null
 }
 
+interface FeeAssignment {
+  fee_id: string
+  value: string
+  max_value: string
+  has_max: boolean
+}
+
 interface SKUData {
   id?: string
   name: string
@@ -26,7 +33,7 @@ interface SKUData {
   base_price: number
   is_active?: boolean
   variations?: Variation[]
-  sku_fees?: { fee_id: string }[]
+  sku_fees?: { fee_id: string; value: number; max_value: number | null }[]
 }
 
 interface SKUFormProps {
@@ -51,8 +58,13 @@ export default function SKUForm({ sku, fees, onClose }: SKUFormProps) {
       base_price_override: v.base_price_override?.toString() ?? '',
     })) ?? []
   )
-  const [selectedFeeIds, setSelectedFeeIds] = useState<string[]>(
-    sku?.sku_fees?.map((f) => f.fee_id) ?? []
+  const [feeAssignments, setFeeAssignments] = useState<FeeAssignment[]>(
+    sku?.sku_fees?.map((f) => ({
+      fee_id: f.fee_id,
+      value: f.value?.toString() ?? '',
+      max_value: f.max_value?.toString() ?? '',
+      has_max: f.max_value !== null && f.max_value > 0,
+    })) ?? []
   )
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -74,7 +86,11 @@ export default function SKUForm({ sku, fees, onClose }: SKUFormProps) {
       sku_code: skuCode.trim(),
       base_price: parseFloat(basePrice) || 0,
       variations: parsedVariations,
-      fee_ids: selectedFeeIds,
+      fees: feeAssignments.map((a) => ({
+        fee_id: a.fee_id,
+        value: parseFloat(a.value) || 0,
+        max_value: a.has_max ? (parseFloat(a.max_value) || null) : null,
+      })),
     }
 
     const result = isEdit
@@ -108,7 +124,7 @@ export default function SKUForm({ sku, fees, onClose }: SKUFormProps) {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Product name"
               required
             />
@@ -121,7 +137,7 @@ export default function SKUForm({ sku, fees, onClose }: SKUFormProps) {
                 type="text"
                 value={skuCode}
                 onChange={(e) => setSkuCode(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="e.g. SKU-001"
                 required
               />
@@ -134,7 +150,7 @@ export default function SKUForm({ sku, fees, onClose }: SKUFormProps) {
                 min="0"
                 value={basePrice}
                 onChange={(e) => setBasePrice(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
@@ -144,8 +160,8 @@ export default function SKUForm({ sku, fees, onClose }: SKUFormProps) {
 
           <SKUFeeAssignment
             fees={fees}
-            selectedFeeIds={selectedFeeIds}
-            onChange={setSelectedFeeIds}
+            assignments={feeAssignments}
+            onChange={setFeeAssignments}
           />
 
           {error && <p className="text-sm text-red-600">{error}</p>}

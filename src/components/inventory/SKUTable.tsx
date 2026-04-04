@@ -9,7 +9,7 @@ import Link from 'next/link'
 interface Fee {
   id: string
   name: string
-  percentage: number
+  fee_type: 'fixed' | 'percentage'
   is_active: boolean
 }
 
@@ -26,7 +26,7 @@ interface SKUWithRelations {
   base_price: number
   is_active: boolean
   sku_variations: Variation[]
-  sku_fees: { fee_id: string; fees: Fee }[]
+  sku_fees: { fee_id: string; value: number; max_value: number | null; fees: Fee }[]
 }
 
 interface SKUTableProps {
@@ -65,7 +65,7 @@ export default function SKUTable({ skus, fees }: SKUTableProps) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search SKU name or code..."
-            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <button
@@ -115,9 +115,18 @@ export default function SKUTable({ skus, fees }: SKUTableProps) {
                   </td>
                   <td className="px-4 py-3">
                     {sku.sku_fees.length > 0 ? (
-                      <span className="text-gray-600">
-                        {sku.sku_fees.map((f) => f.fees.name).join(', ')}
-                      </span>
+                      <div className="space-y-0.5">
+                        {sku.sku_fees.map((f) => (
+                          <span key={f.fee_id} className="block text-gray-600">
+                            {f.fees.name}{' '}
+                            <span className="text-xs">
+                              {f.fees.fee_type === 'percentage'
+                                ? `${f.value}%${f.max_value ? ` max Rp ${Number(f.max_value).toLocaleString('id-ID')}` : ''}`
+                                : `Rp ${Number(f.value).toLocaleString('id-ID')}`}
+                            </span>
+                          </span>
+                        ))}
+                      </div>
                     ) : (
                       <span className="text-gray-400">-</span>
                     )}

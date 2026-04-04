@@ -8,7 +8,7 @@ import FeeForm from './FeeForm'
 interface Fee {
   id: string
   name: string
-  percentage: number
+  fee_type: 'fixed' | 'percentage'
   is_active: boolean
   created_at: string
 }
@@ -48,7 +48,7 @@ export default function FeeTable({ fees }: FeeTableProps) {
           <thead className="bg-gray-50">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Percentage</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-600">Type</th>
               <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
               <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
             </tr>
@@ -64,7 +64,15 @@ export default function FeeTable({ fees }: FeeTableProps) {
               fees.map((fee) => (
                 <tr key={fee.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-medium text-gray-900">{fee.name}</td>
-                  <td className="px-4 py-3 text-gray-600">{fee.percentage}%</td>
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                      fee.fee_type === 'percentage'
+                        ? 'bg-purple-50 text-purple-700'
+                        : 'bg-amber-50 text-amber-700'
+                    }`}>
+                      {fee.fee_type === 'percentage' ? '% Percentage' : 'IDR Fixed'}
+                    </span>
+                  </td>
                   <td className="px-4 py-3">
                     <span
                       className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${

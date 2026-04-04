@@ -6,13 +6,13 @@ import { revalidatePath } from 'next/cache'
 export async function createFee(formData: FormData) {
   const supabase = await createClient()
   const name = formData.get('name') as string
-  const percentage = parseFloat(formData.get('percentage') as string)
+  const fee_type = formData.get('fee_type') as string
 
-  if (!name || isNaN(percentage) || percentage < 0 || percentage > 100) {
-    return { error: 'Invalid name or percentage' }
+  if (!name || !fee_type || !['fixed', 'percentage'].includes(fee_type)) {
+    return { error: 'Invalid name or fee type' }
   }
 
-  const { error } = await supabase.from('fees').insert({ name, percentage })
+  const { error } = await supabase.from('fees').insert({ name, fee_type })
   if (error) return { error: error.message }
 
   revalidatePath('/dashboard/inventory/fees')
@@ -22,15 +22,15 @@ export async function createFee(formData: FormData) {
 export async function updateFee(id: string, formData: FormData) {
   const supabase = await createClient()
   const name = formData.get('name') as string
-  const percentage = parseFloat(formData.get('percentage') as string)
+  const fee_type = formData.get('fee_type') as string
 
-  if (!name || isNaN(percentage) || percentage < 0 || percentage > 100) {
-    return { error: 'Invalid name or percentage' }
+  if (!name || !fee_type || !['fixed', 'percentage'].includes(fee_type)) {
+    return { error: 'Invalid name or fee type' }
   }
 
   const { error } = await supabase
     .from('fees')
-    .update({ name, percentage, updated_at: new Date().toISOString() })
+    .update({ name, fee_type, updated_at: new Date().toISOString() })
     .eq('id', id)
   if (error) return { error: error.message }
 
