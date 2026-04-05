@@ -93,8 +93,10 @@ export default async function OrdersPage() {
   }
 
   // Enrich orders with calculated financial data
+  const ORDER_FLAT_FEE = 1250;
+
   const enrichedOrders = typedOrders.map(order => {
-    const items = (order.order_items ?? []).map(item => {
+    const rawItems = (order.order_items ?? []).map(item => {
       const sellingPrice = Number(item.discounted_price) * item.quantity;
 
       // Base price: prefer variation override, fallback to SKU base price
@@ -136,12 +138,24 @@ export default async function OrdersPage() {
       };
     });
 
-    // Order-level totals (include flat per-order fee of IDR 1,250)
-    const ORDER_FLAT_FEE = 1250;
-    const total_selling = items.reduce((s, i) => s + i.selling_price, 0);
+    // Distribute flat per-order fee across items proportionally by selling price
+    const totalSelling = rawItems.reduce((s, i) => s + i.selling_price, 0);
+    let feeRemaining = ORDER_FLAT_FEE;
+    const items = rawItems.map((item, idx) => {
+      const share = idx < rawItems.length - 1
+        ? Math.round((item.selling_price / totalSelling) * ORDER_FLAT_FEE)
+        : feeRemaining;
+      feeRemaining -= share;
+      const admin_fee = item.admin_fee + share;
+      const margin = item.base_price != null ? item.selling_price - item.base_price - admin_fee : null;
+      return { ...item, admin_fee, margin: margin != null ? Math.round(margin) : null };
+    });
+
+    // Order-level totals
+    const total_selling = totalSelling;
     const hasNullBase = items.some(i => i.base_price === null);
     const total_base = hasNullBase ? null : items.reduce((s, i) => s + (i.base_price ?? 0), 0);
-    const total_admin_fee = items.reduce((s, i) => s + i.admin_fee, 0) + ORDER_FLAT_FEE;
+    const total_admin_fee = items.reduce((s, i) => s + i.admin_fee, 0);
     const total_margin = total_base != null ? Math.round(total_selling - total_base - total_admin_fee) : null;
 
     return {
