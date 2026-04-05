@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { X } from 'lucide-react'
 import { createSKU, updateSKU } from '@/app/dashboard/inventory/actions'
 import SKUVariations from './SKUVariations'
@@ -68,6 +68,25 @@ export default function SKUForm({ sku, fees, onClose }: SKUFormProps) {
   )
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const codeManuallyEdited = useRef(false)
+
+  function generateSkuCode(name: string): string {
+    const prefix = name
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z]/g, '')
+      .slice(0, 3)
+      .padEnd(3, 'X')
+    const num = Math.floor(1000 + Math.random() * 9000)
+    return `${prefix}${num}`
+  }
+
+  function handleNameChange(value: string) {
+    setName(value)
+    if (!isEdit && !codeManuallyEdited.current) {
+      setSkuCode(generateSkuCode(value))
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -123,7 +142,7 @@ export default function SKUForm({ sku, fees, onClose }: SKUFormProps) {
             <input
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => handleNameChange(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Product name"
               required
@@ -136,7 +155,10 @@ export default function SKUForm({ sku, fees, onClose }: SKUFormProps) {
               <input
                 type="text"
                 value={skuCode}
-                onChange={(e) => setSkuCode(e.target.value)}
+                onChange={(e) => {
+                  codeManuallyEdited.current = true
+                  setSkuCode(e.target.value)
+                }}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="e.g. SKU-001"
                 required

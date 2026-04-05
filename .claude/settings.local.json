@@ -24,7 +24,12 @@
       "mcp__supabase__list_migrations",
       "mcp__supabase__search_docs",
       "mcp__supabase__apply_migration",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(node -e \":*)",
+      "mcp__supabase__get_advisors",
+      "mcp__supabase__execute_sql",
+      "Bash(npx tsc:*)",
+      "Bash(git add:*)"
     ]
   }
 }

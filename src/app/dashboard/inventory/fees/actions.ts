@@ -38,6 +38,16 @@ export async function updateFee(id: string, formData: FormData) {
   return { success: true }
 }
 
+export async function deleteFees(ids: string[]) {
+  const supabase = await createClient()
+
+  const { error } = await supabase.from('fees').delete().in('id', ids)
+  if (error) return { error: error.message }
+
+  revalidatePath('/dashboard/inventory/fees')
+  return { success: true }
+}
+
 export async function toggleFee(id: string, isActive: boolean) {
   const supabase = await createClient()
 

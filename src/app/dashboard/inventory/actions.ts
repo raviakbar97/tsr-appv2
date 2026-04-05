@@ -138,6 +138,16 @@ export async function deleteSKU(id: string) {
   return { success: true }
 }
 
+export async function deleteSKUs(ids: string[]) {
+  const supabase = await createClient()
+
+  const { error } = await supabase.from('skus').delete().in('id', ids)
+  if (error) return { error: error.message }
+
+  revalidatePath('/dashboard/inventory')
+  return { success: true }
+}
+
 export async function toggleSKU(id: string, isActive: boolean) {
   const supabase = await createClient()
 
