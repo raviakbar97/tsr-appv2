@@ -136,12 +136,13 @@ export default async function OrdersPage() {
       };
     });
 
-    // Order-level totals
+    // Order-level totals (include flat per-order fee of IDR 1,250)
+    const ORDER_FLAT_FEE = 1250;
     const total_selling = items.reduce((s, i) => s + i.selling_price, 0);
     const hasNullBase = items.some(i => i.base_price === null);
     const total_base = hasNullBase ? null : items.reduce((s, i) => s + (i.base_price ?? 0), 0);
-    const total_admin_fee = items.reduce((s, i) => s + i.admin_fee, 0);
-    const total_margin = total_base != null ? total_selling - total_base - total_admin_fee : null;
+    const total_admin_fee = items.reduce((s, i) => s + i.admin_fee, 0) + ORDER_FLAT_FEE;
+    const total_margin = total_base != null ? Math.round(total_selling - total_base - total_admin_fee) : null;
 
     return {
       id: order.id,

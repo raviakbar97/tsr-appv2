@@ -83,6 +83,10 @@ export default async function DashboardPage() {
     }
   }
 
+  // Subtract flat per-order fee (IDR 1,250 per order)
+  const ORDER_FLAT_FEE = 1250;
+  totalProfit -= ORDER_FLAT_FEE * totalOrders;
+
   // Build order_id → items lookup
   const orderItemsMap = new Map<string, typeof items>();
   for (const i of items) {
