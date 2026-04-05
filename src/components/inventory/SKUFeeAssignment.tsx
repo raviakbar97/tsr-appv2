@@ -1,10 +1,19 @@
 'use client'
 
+interface FeeTier {
+  id: string
+  tier_name: string
+  value: number
+  max_value: number | null
+  sort_order: number
+}
+
 interface Fee {
   id: string
   name: string
   fee_type: 'fixed' | 'percentage'
   is_active: boolean
+  fee_tiers?: FeeTier[]
 }
 
 interface FeeAssignment {
@@ -12,6 +21,7 @@ interface FeeAssignment {
   value: string
   max_value: string
   has_max: boolean
+  fee_tier_id: string
 }
 
 interface SKUFeeAssignmentProps {
@@ -26,7 +36,7 @@ export default function SKUFeeAssignment({ fees, assignments, onChange }: SKUFee
     if (existing) {
       onChange(assignments.filter((a) => a.fee_id !== feeId))
     } else {
-      onChange([...assignments, { fee_id: feeId, value: '', max_value: '', has_max: false }])
+      onChange([...assignments, { fee_id: feeId, value: '', max_value: '', has_max: false, fee_tier_id: '' }])
     }
   }
 
@@ -36,13 +46,41 @@ export default function SKUFeeAssignment({ fees, assignments, onChange }: SKUFee
     )
   }
 
+  function selectTier(feeId: string, tierId: string, fee: Fee) {
+    const tier = fee.fee_tiers?.find((t) => t.id === tierId)
+    if (!tier) return
+    onChange(
+      assignments.map((a) =>
+        a.fee_id === feeId
+          ? {
+              ...a,
+              fee_tier_id: tierId,
+              value: tier.value.toString(),
+              max_value: tier.max_value?.toString() ?? '',
+              has_max: tier.max_value !== null && tier.max_value > 0,
+            }
+          : a
+      )
+    )
+  }
+
+  function clearTier(feeId: string) {
+    onChange(
+      assignments.map((a) =>
+        a.fee_id === feeId
+          ? { ...a, fee_tier_id: '', value: '', max_value: '', has_max: false }
+          : a
+      )
+    )
+  }
+
   const activeFees = fees.filter((f) => f.is_active)
 
   if (activeFees.length === 0) {
     return (
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Fee Assignment</label>
-        <p className="text-xs text-gray-400">No active fees available. Create fees in the Fee Registry first.</p>
+        <p className="text-xs text-gray-500">No active fees available. Create fees in the Fee Registry first.</p>
       </div>
     )
   }
@@ -54,6 +92,9 @@ export default function SKUFeeAssignment({ fees, assignments, onChange }: SKUFee
         {activeFees.map((fee) => {
           const assignment = assignments.find((a) => a.fee_id === fee.id)
           const isChecked = !!assignment
+          const hasTiers = (fee.fee_tiers?.length ?? 0) > 0
+          const tiers = fee.fee_tiers ?? []
+
           return (
             <div key={fee.id} className="border border-gray-100 rounded-lg p-3">
               <div className="flex items-center gap-2">
@@ -73,7 +114,44 @@ export default function SKUFeeAssignment({ fees, assignments, onChange }: SKUFee
                 </span>
               </div>
 
-              {isChecked && (
+              {isChecked && hasTiers && (
+                <div className="mt-2 ml-6 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-gray-500 w-20">Tier</label>
+                    <select
+                      value={assignment?.fee_tier_id ?? ''}
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          selectTier(fee.id, e.target.value, fee)
+                        } else {
+                          clearTier(fee.id)
+                        }
+                      }}
+                      className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select a tier...</option>
+                      {tiers.map((tier) => (
+                        <option key={tier.id} value={tier.id}>
+                          {tier.tier_name}{' '}
+                          ({fee.fee_type === 'percentage'
+                            ? `${tier.value}%`
+                            : `Rp ${Number(tier.value).toLocaleString('id-ID')}`})
+                          {tier.max_value ? ` (max Rp ${Number(tier.max_value).toLocaleString('id-ID')})` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {assignment?.fee_tier_id && (
+                    <p className="text-xs text-gray-500 ml-20">
+                      {fee.fee_type === 'percentage'
+                        ? `${assignment.value}%${assignment.has_max ? ` (max Rp ${Number(assignment.max_value).toLocaleString('id-ID')})` : ''}`
+                        : `Rp ${Number(assignment.value).toLocaleString('id-ID')}`}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {isChecked && !hasTiers && (
                 <div className="mt-2 ml-6 space-y-2">
                   <div className="flex items-center gap-2">
                     <label className="text-xs text-gray-500 w-20">
@@ -89,7 +167,7 @@ export default function SKUFeeAssignment({ fees, assignments, onChange }: SKUFee
                       className="w-36 border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     />
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-gray-500">
                       {fee.fee_type === 'percentage' ? '%' : 'IDR'}
                     </span>
                   </div>
@@ -121,7 +199,7 @@ export default function SKUFeeAssignment({ fees, assignments, onChange }: SKUFee
                             className="w-36 border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required
                           />
-                          <span className="text-xs text-gray-400">IDR</span>
+                          <span className="text-xs text-gray-500">IDR</span>
                         </>
                       )}
                     </div>

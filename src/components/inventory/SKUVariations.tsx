@@ -13,6 +13,17 @@ interface SKUVariationsProps {
 }
 
 export default function SKUVariations({ variations, onChange }: SKUVariationsProps) {
+  function sanitizePrice(raw: string): string {
+    let s = raw.replace(/[Rr]p\.?\s?/g, '').replace(/[^\d.,]/g, '')
+    if (!s) return ''
+    const decMatch = s.match(/[.,](\d{1,2})$/)
+    if (decMatch) {
+      const intPart = s.slice(0, -decMatch[0].length).replace(/[.,]/g, '')
+      return intPart + '.' + decMatch[1]
+    }
+    return s.replace(/[.,]/g, '')
+  }
+
   function addVariation() {
     onChange([...variations, { variation_name: '', base_price_override: '' }])
   }
@@ -41,7 +52,7 @@ export default function SKUVariations({ variations, onChange }: SKUVariationsPro
       </div>
 
       {variations.length === 0 ? (
-        <p className="text-xs text-gray-400 py-2">No variations. Click &quot;Add Variation&quot; to add options like size, color, etc.</p>
+        <p className="text-xs text-gray-500 py-2">No variations. Click &quot;Add Variation&quot; to add options like size, color, etc.</p>
       ) : (
         <div className="space-y-2">
           {variations.map((v, i) => (
@@ -55,13 +66,14 @@ export default function SKUVariations({ variations, onChange }: SKUVariationsPro
                 required
               />
               <input
-                type="number"
-                step="0.01"
-                min="0"
+                type="text"
+                inputMode="decimal"
                 value={v.base_price_override}
-                onChange={(e) => updateVariation(i, 'base_price_override', e.target.value)}
-                placeholder="Price override (optional)"
+                onChange={(e) => updateVariation(i, 'base_price_override', sanitizePrice(e.target.value))}
+                onBlur={(e) => updateVariation(i, 'base_price_override', sanitizePrice(e.target.value))}
+                placeholder="Price"
                 className="w-40 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
               />
               <button
                 type="button"

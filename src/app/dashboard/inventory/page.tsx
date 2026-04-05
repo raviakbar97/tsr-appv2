@@ -9,9 +9,9 @@ export default async function InventoryPage() {
   const [{ data: skus }, { data: fees }] = await Promise.all([
     supabase
       .from('skus')
-      .select(`*, sku_variations(*), sku_fees(fee_id, value, max_value, fees(*))`)
+      .select(`*, sku_variations(*), sku_fees(fee_id, value, max_value, fee_tier_id, fees(*, fee_tiers(*)))`)
       .order('created_at', { ascending: false }),
-    supabase.from('fees').select('*').order('name'),
+    supabase.from('fees').select('*, fee_tiers(*)').order('name'),
   ])
 
   return (

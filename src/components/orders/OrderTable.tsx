@@ -2,12 +2,13 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Package, ChevronDown, ChevronRight, Trash2, Calendar, Loader2, AlertTriangle } from "lucide-react";
-import { pruneOrders } from "@/app/dashboard/orders/actions";
+import { Package, ChevronDown, ChevronRight, Trash2, Calendar, Loader2, AlertTriangle, RefreshCw } from "lucide-react";
+import { pruneOrders, recalculateOrders } from "@/app/dashboard/orders/actions";
 
 interface EnrichedItem {
   product_name: string;
   parent_sku: string;
+  variation_name: string | null;
   quantity: number;
   selling_price: number;
   base_price: number | null;
@@ -47,6 +48,8 @@ export default function OrderTable({ orders }: OrderTableProps) {
   const [confirmAll, setConfirmAll] = useState(false);
   const [confirmRange, setConfirmRange] = useState(false);
   const [pruneError, setPruneError] = useState<string | null>(null);
+  const [recalculating, setRecalculating] = useState(false);
+  const [recalcResult, setRecalcResult] = useState<string | null>(null);
 
   const filtered = filter
     ? orders.filter(
@@ -90,10 +93,27 @@ export default function OrderTable({ orders }: OrderTableProps) {
     }
   }
 
+  async function handleRecalculate() {
+    setRecalculating(true);
+    setRecalcResult(null);
+    try {
+      const res = await recalculateOrders();
+      setRecalculating(false);
+      const msg = res.updated > 0
+        ? `Updated ${res.updated} of ${res.total} order items with latest SKU data.`
+        : "All order items are already up to date.";
+      setRecalcResult(msg);
+      router.refresh();
+    } catch {
+      setRecalculating(false);
+      setRecalcResult("Error: Failed to recalculate orders.");
+    }
+  }
+
   return (
     <div>
       {/* Toolbar */}
-      <div className="mb-4 flex items-center gap-3">
+      <div className="mb-4 flex items-center gap-3 flex-wrap">
         <input
           type="text"
           placeholder="Search orders..."
@@ -102,6 +122,14 @@ export default function OrderTable({ orders }: OrderTableProps) {
           className="flex-1 max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
+          onClick={handleRecalculate}
+          disabled={recalculating}
+          className="flex items-center gap-2 px-3 py-2 border border-blue-200 rounded-lg text-sm text-blue-700 hover:bg-blue-50 transition-colors disabled:opacity-50"
+        >
+          <RefreshCw size={14} className={recalculating ? "animate-spin" : ""} />
+          {recalculating ? "Recalculating..." : "Recalculate"}
+        </button>
+        <button
           onClick={() => { setShowPrune(!showPrune); setConfirmAll(false); setConfirmRange(false); setPruneError(null); }}
           className="flex items-center gap-2 px-3 py-2 border border-red-200 rounded-lg text-sm text-red-700 hover:bg-red-50 transition-colors"
         >
@@ -109,6 +137,18 @@ export default function OrderTable({ orders }: OrderTableProps) {
           Prune Data
         </button>
       </div>
+
+      {/* Recalculate result */}
+      {recalcResult && (
+        <div className={`mb-4 p-3 rounded-lg text-sm flex items-center gap-2 ${
+          recalcResult.startsWith("Error")
+            ? "bg-red-50 border border-red-200 text-red-700"
+            : "bg-green-50 border border-green-200 text-green-700"
+        }`}>
+          {recalcResult.startsWith("Error") ? <AlertTriangle size={14} /> : <RefreshCw size={14} />}
+          {recalcResult}
+        </div>
+      )}
 
       {/* Prune panel */}
       {showPrune && (
@@ -129,7 +169,7 @@ export default function OrderTable({ orders }: OrderTableProps) {
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-3">
             <div>
               <p className="text-sm font-medium text-gray-900">Delete All Orders</p>
-              <p className="text-xs text-gray-800">{orders.length} orders will be permanently deleted</p>
+              <p className="text-xs text-gray-500">{orders.length} orders will be permanently deleted</p>
             </div>
             {confirmAll ? (
               <div className="flex items-center gap-2">
@@ -170,7 +210,7 @@ export default function OrderTable({ orders }: OrderTableProps) {
                   onChange={(e) => setPruneFrom(e.target.value)}
                   className="[color-scheme:light] px-2 py-1.5 border border-gray-300 rounded-md text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
-                <span className="text-xs text-gray-800">to</span>
+                <span className="text-xs text-gray-500">to</span>
                 <input
                   type="date"
                   value={pruneTo}
@@ -213,8 +253,8 @@ export default function OrderTable({ orders }: OrderTableProps) {
       {/* Table */}
       {filtered.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
-          <Package size={48} className="mx-auto text-gray-400 mb-4" />
-          <p className="text-gray-600">No orders yet</p>
+          <Package size={48} className="mx-auto text-gray-300 mb-4" />
+          <p className="text-gray-500">No orders yet</p>
         </div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-xl overflow-x-auto">
@@ -225,6 +265,7 @@ export default function OrderTable({ orders }: OrderTableProps) {
                 <th className="text-left px-4 py-3 font-medium">Date</th>
                 <th className="text-left px-4 py-3 font-medium">Order #</th>
                 <th className="text-left px-4 py-3 font-medium">Product</th>
+                <th className="text-left px-4 py-3 font-medium">Variation</th>
                 <th className="text-right px-4 py-3 font-medium">Selling Price</th>
                 <th className="text-right px-4 py-3 font-medium">Base Price</th>
                 <th className="text-right px-4 py-3 font-medium">Admin Fee</th>
@@ -240,7 +281,7 @@ export default function OrderTable({ orders }: OrderTableProps) {
                       className="border-t border-gray-100 hover:bg-gray-50 cursor-pointer"
                       onClick={() => setExpanded(isOpen ? null : order.id)}
                     >
-                      <td className="px-3 py-3 text-gray-800">
+                      <td className="px-3 py-3 text-gray-400">
                         {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
@@ -253,7 +294,14 @@ export default function OrderTable({ orders }: OrderTableProps) {
                         {order.items.map((item, i) => (
                           <div key={i} className={lineClass(i)}>
                             {item.product_name}
-                            <span className="ml-1">×{item.quantity}</span>
+                            <span className="ml-1 text-gray-500">×{item.quantity}</span>
+                          </div>
+                        ))}
+                      </td>
+                      <td className="px-4 py-3">
+                        {order.items.map((item, i) => (
+                          <div key={i} className={lineClass(i)}>
+                            {item.variation_name || <span className="text-gray-400">-</span>}
                           </div>
                         ))}
                       </td>
@@ -267,21 +315,21 @@ export default function OrderTable({ orders }: OrderTableProps) {
                       <td className="px-4 py-3 text-right font-mono whitespace-nowrap">
                         {order.items.map((item, i) => (
                           <div key={i} className={lineClass(i)}>
-                            {item.base_price != null ? formatIDR(item.base_price) : "-"}
+                            {item.base_price != null ? formatIDR(item.base_price) : <span className="text-gray-400">-</span>}
                           </div>
                         ))}
                       </td>
                       <td className="px-4 py-3 text-right font-mono whitespace-nowrap">
                         {order.items.map((item, i) => (
                           <div key={i} className={lineClass(i)}>
-                            {item.admin_fee > 0 ? formatIDR(item.admin_fee) : "-"}
+                            {item.admin_fee > 0 ? formatIDR(item.admin_fee) : <span className="text-gray-400">-</span>}
                           </div>
                         ))}
                       </td>
                       <td className="px-4 py-3 text-right font-mono whitespace-nowrap">
                         {order.items.map((item, i) => (
                           <div key={i} className={`${lineClass(i)} ${marginColor(item.margin)}`}>
-                            {item.margin != null ? formatIDR(item.margin) : "-"}
+                            {item.margin != null ? formatIDR(item.margin) : <span className="text-gray-400">-</span>}
                           </div>
                         ))}
                       </td>
@@ -289,7 +337,7 @@ export default function OrderTable({ orders }: OrderTableProps) {
 
                     {isOpen && (
                       <tr className="border-t border-gray-100">
-                        <td colSpan={8} className="bg-gray-50 px-6 py-4">
+                        <td colSpan={9} className="bg-gray-50 px-6 py-4">
                           <OrderDetail order={order} />
                         </td>
                       </tr>
@@ -316,12 +364,12 @@ function OrderDetail({ order }: { order: EnrichedOrder }) {
 
       {order.items.length > 0 && (
         <div className="col-span-full mt-2 pt-2 border-t border-gray-200">
-          <p className="text-xs font-medium text-gray-800 mb-2">Parent SKU per Item</p>
+          <p className="text-xs font-medium text-gray-600 mb-2">Parent SKU per Item</p>
           <div className="flex flex-wrap gap-3">
             {order.items.map((item, i) => (
               <div key={i} className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs">
                 <p className="font-mono text-gray-900">{item.parent_sku || "-"}</p>
-                <p className="text-gray-800 mt-0.5 truncate max-w-[200px]">{item.product_name}</p>
+                <p className="text-gray-500 mt-0.5 truncate max-w-[200px]">{item.product_name}</p>
               </div>
             ))}
           </div>
@@ -334,7 +382,7 @@ function OrderDetail({ order }: { order: EnrichedOrder }) {
 function DetailField({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <div>
-      <p className="text-xs text-gray-800 font-medium">{label}</p>
+      <p className="text-xs text-gray-500 font-medium">{label}</p>
       <p className="text-gray-900">{value || "-"}</p>
     </div>
   );

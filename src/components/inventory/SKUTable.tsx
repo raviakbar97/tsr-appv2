@@ -6,11 +6,20 @@ import { deleteSKU, deleteSKUs, toggleSKU } from '@/app/dashboard/inventory/acti
 import SKUForm from './SKUForm'
 import Link from 'next/link'
 
+interface FeeTier {
+  id: string
+  tier_name: string
+  value: number
+  max_value: number | null
+  sort_order: number
+}
+
 interface Fee {
   id: string
   name: string
   fee_type: 'fixed' | 'percentage'
   is_active: boolean
+  fee_tiers?: FeeTier[]
 }
 
 interface Variation {
@@ -26,7 +35,7 @@ interface SKUWithRelations {
   base_price: number
   is_active: boolean
   sku_variations: Variation[]
-  sku_fees: { fee_id: string; value: number; max_value: number | null; fees: Fee }[]
+  sku_fees: { fee_id: string; value: number; max_value: number | null; fee_tier_id: string | null; fees: Fee }[]
 }
 
 interface SKUTableProps {
@@ -185,31 +194,53 @@ export default function SKUTable({ skus, fees }: SKUTableProps) {
                   )}
                   <td className="px-4 py-3 font-mono text-xs text-gray-600">{sku.sku_code}</td>
                   <td className="px-4 py-3 font-medium text-gray-900">{sku.name}</td>
-                  <td className="px-4 py-3 text-gray-600">Rp {Number(sku.base_price).toLocaleString('id-ID')}</td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {sku.sku_variations.length > 0
+                      ? (() => {
+                          const prices = sku.sku_variations
+                            .map((v) => v.base_price_override)
+                            .filter((p): p is number => p !== null && p > 0)
+                          if (prices.length === 0) return `Rp ${Number(sku.base_price).toLocaleString('id-ID')}`
+                          const min = Math.min(...prices)
+                          const max = Math.max(...prices)
+                          return min === max
+                            ? `Rp ${Number(min).toLocaleString('id-ID')}`
+                            : `Rp ${Number(min).toLocaleString('id-ID')} - ${Number(max).toLocaleString('id-ID')}`
+                        })()
+                      : `Rp ${Number(sku.base_price).toLocaleString('id-ID')}`}
+                  </td>
                   <td className="px-4 py-3">
                     {sku.sku_variations.length > 0 ? (
                       <span className="text-gray-600">
-                        {sku.sku_variations.map((v) => v.variation_name).join(', ')}
+                        {(() => {
+                          const names = sku.sku_variations.map((v) => v.variation_name)
+                          const show = names.slice(0, 2)
+                          const rest = names.length - 2
+                          return rest > 0
+                            ? `${show.join(', ')} and ${rest} More...`
+                            : show.join(', ')
+                        })()}
                       </span>
                     ) : (
                       <span className="text-gray-400">-</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    {sku.sku_fees.length > 0 ? (
-                      <div className="space-y-0.5">
-                        {sku.sku_fees.map((f) => (
-                          <span key={f.fee_id} className="block text-gray-600">
-                            {f.fees.name}{' '}
-                            <span className="text-xs">
-                              {f.fees.fee_type === 'percentage'
-                                ? `${f.value}%${f.max_value ? ` max Rp ${Number(f.max_value).toLocaleString('id-ID')}` : ''}`
-                                : `Rp ${Number(f.value).toLocaleString('id-ID')}`}
-                            </span>
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
+                    {sku.sku_fees.length > 0 ? (() => {
+                      const pct = sku.sku_fees
+                        .filter((f) => f.fees.fee_type === 'percentage')
+                        .reduce((s, f) => s + f.value, 0)
+                      const fixed = sku.sku_fees
+                        .filter((f) => f.fees.fee_type === 'fixed')
+                        .reduce((s, f) => s + f.value, 0)
+                      return (
+                        <span className="text-gray-600">
+                          {pct > 0 && <span className="text-purple-600">{pct}%</span>}
+                          {pct > 0 && fixed > 0 && <span className="text-gray-500"> + </span>}
+                          {fixed > 0 && <span className="text-amber-600">Rp {Number(fixed).toLocaleString('id-ID')}</span>}
+                        </span>
+                      )
+                    })() : (
                       <span className="text-gray-400">-</span>
                     )}
                   </td>

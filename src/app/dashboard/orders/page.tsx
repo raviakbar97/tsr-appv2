@@ -9,6 +9,7 @@ interface OrderItemRow {
   variation_id: string | null;
   parent_sku: string;
   product_name: string;
+  variation_name: string | null;
   discounted_price: number;
   quantity: number;
   buyer_paid: number;
@@ -119,12 +120,14 @@ export default async function OrdersPage() {
           adminFee += feeAmount;
         }
       }
+      adminFee = Math.round(adminFee);
 
-      const margin = basePrice != null ? sellingPrice - basePrice - adminFee : null;
+      const margin = basePrice != null ? Math.round(sellingPrice - basePrice - adminFee) : null;
 
       return {
         product_name: item.product_name,
         parent_sku: item.parent_sku,
+        variation_name: item.variation_name,
         quantity: item.quantity,
         selling_price: sellingPrice,
         base_price: basePrice,

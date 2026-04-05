@@ -6,11 +6,20 @@ import { createSKU, updateSKU } from '@/app/dashboard/inventory/actions'
 import SKUVariations from './SKUVariations'
 import SKUFeeAssignment from './SKUFeeAssignment'
 
+interface FeeTier {
+  id: string
+  tier_name: string
+  value: number
+  max_value: number | null
+  sort_order: number
+}
+
 interface Fee {
   id: string
   name: string
   fee_type: 'fixed' | 'percentage'
   is_active: boolean
+  fee_tiers?: FeeTier[]
 }
 
 interface Variation {
@@ -24,6 +33,7 @@ interface FeeAssignment {
   value: string
   max_value: string
   has_max: boolean
+  fee_tier_id: string
 }
 
 interface SKUData {
@@ -32,8 +42,8 @@ interface SKUData {
   sku_code: string
   base_price: number
   is_active?: boolean
-  variations?: Variation[]
-  sku_fees?: { fee_id: string; value: number; max_value: number | null }[]
+  sku_variations?: Variation[]
+  sku_fees?: { fee_id: string; value: number; max_value: number | null; fee_tier_id: string | null }[]
 }
 
 interface SKUFormProps {
@@ -53,7 +63,7 @@ export default function SKUForm({ sku, fees, onClose }: SKUFormProps) {
   const [skuCode, setSkuCode] = useState(sku?.sku_code ?? '')
   const [basePrice, setBasePrice] = useState(sku?.base_price?.toString() ?? '0')
   const [variations, setVariations] = useState<VariationInput[]>(
-    sku?.variations?.map((v) => ({
+    sku?.sku_variations?.map((v) => ({
       variation_name: v.variation_name,
       base_price_override: v.base_price_override?.toString() ?? '',
     })) ?? []
@@ -64,6 +74,7 @@ export default function SKUForm({ sku, fees, onClose }: SKUFormProps) {
       value: f.value?.toString() ?? '',
       max_value: f.max_value?.toString() ?? '',
       has_max: f.max_value !== null && f.max_value > 0,
+      fee_tier_id: f.fee_tier_id ?? '',
     })) ?? []
   )
   const [error, setError] = useState('')
@@ -79,6 +90,17 @@ export default function SKUForm({ sku, fees, onClose }: SKUFormProps) {
       .padEnd(3, 'X')
     const num = Math.floor(1000 + Math.random() * 9000)
     return `${prefix}${num}`
+  }
+
+  function sanitizePrice(raw: string): string {
+    let s = raw.replace(/[Rr]p\.?\s?/g, '').replace(/[^\d.,]/g, '')
+    if (!s) return ''
+    const decMatch = s.match(/[.,](\d{1,2})$/)
+    if (decMatch) {
+      const intPart = s.slice(0, -decMatch[0].length).replace(/[.,]/g, '')
+      return intPart + '.' + decMatch[1]
+    }
+    return s.replace(/[.,]/g, '')
   }
 
   function handleNameChange(value: string) {
@@ -109,6 +131,7 @@ export default function SKUForm({ sku, fees, onClose }: SKUFormProps) {
         fee_id: a.fee_id,
         value: parseFloat(a.value) || 0,
         max_value: a.has_max ? (parseFloat(a.max_value) || null) : null,
+        fee_tier_id: a.fee_tier_id || null,
       })),
     }
 
@@ -165,15 +188,25 @@ export default function SKUForm({ sku, fees, onClose }: SKUFormProps) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Base Price</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Base Price
+                {variations.length > 0 && (
+                  <span className="text-xs font-normal text-gray-400 ml-1">(set per variation)</span>
+                )}
+              </label>
               <input
-                type="number"
-                step="0.01"
-                min="0"
+                type="text"
+                inputMode="decimal"
                 value={basePrice}
-                onChange={(e) => setBasePrice(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
+                onChange={(e) => setBasePrice(sanitizePrice(e.target.value))}
+                onBlur={(e) => setBasePrice(sanitizePrice(e.target.value))}
+                disabled={variations.length > 0}
+                className={`w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  variations.length > 0
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'text-gray-900'
+                }`}
+                required={variations.length === 0}
               />
             </div>
           </div>

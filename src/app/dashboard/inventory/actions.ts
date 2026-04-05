@@ -12,6 +12,7 @@ interface FeeInput {
   fee_id: string
   value: number
   max_value: number | null
+  fee_tier_id: string | null
 }
 
 export async function createSKU(formData: {
@@ -59,6 +60,7 @@ export async function createSKU(formData: {
       fee_id: f.fee_id,
       value: f.value,
       max_value: f.max_value,
+      fee_tier_id: f.fee_tier_id,
     }))
     const { error: feeError } = await supabase.from('sku_fees').insert(fees)
     if (feeError) return { error: feeError.message }
@@ -118,6 +120,7 @@ export async function updateSKU(
       fee_id: f.fee_id,
       value: f.value,
       max_value: f.max_value,
+      fee_tier_id: f.fee_tier_id,
     }))
     const { error: feeError } = await supabase.from('sku_fees').insert(fees)
     if (feeError) return { error: feeError.message }
