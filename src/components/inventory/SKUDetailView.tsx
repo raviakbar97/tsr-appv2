@@ -6,11 +6,20 @@ import { ArrowLeft, Pencil, Package, TrendingUp, TrendingDown } from 'lucide-rea
 import SKUForm from './SKUForm'
 import StockForm from './StockForm'
 
+interface FeeTier {
+  id: string
+  tier_name: string
+  value: number
+  max_value: number | null
+  sort_order: number
+}
+
 interface Fee {
   id: string
   name: string
   fee_type: 'fixed' | 'percentage'
   is_active: boolean
+  fee_tiers?: FeeTier[]
 }
 
 interface Variation {
@@ -26,7 +35,7 @@ interface SKU {
   base_price: number
   is_active: boolean
   sku_variations: Variation[]
-  sku_fees: { fee_id: string; value: number; max_value: number | null; fees: Fee }[]
+  sku_fees: { fee_id: string; value: number; max_value: number | null; fee_tier_id: string | null; fees: Fee }[]
 }
 
 interface StockRow {
@@ -79,7 +88,20 @@ export default function SKUDetailView({ sku, fees, stockRows, transactions }: SK
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{sku.name}</h1>
             <p className="text-sm text-gray-500 mt-1">
-              {sku.sku_code} &middot; Base Price: Rp {Number(sku.base_price).toLocaleString('id-ID')}
+              {sku.sku_code} &middot; {(() => {
+                if (sku.sku_variations.length === 0)
+                  return `Rp ${Number(sku.base_price).toLocaleString('id-ID')}`
+                const prices = sku.sku_variations
+                  .map((v) => v.base_price_override)
+                  .filter((p): p is number => p !== null && p > 0)
+                if (prices.length === 0)
+                  return `Rp ${Number(sku.base_price).toLocaleString('id-ID')}`
+                const min = Math.min(...prices)
+                const max = Math.max(...prices)
+                return min === max
+                  ? `Rp ${Number(min).toLocaleString('id-ID')}`
+                  : `Rp ${Number(min).toLocaleString('id-ID')} - ${Number(max).toLocaleString('id-ID')}`
+              })()}
             </p>
           </div>
           <button
@@ -168,10 +190,19 @@ export default function SKUDetailView({ sku, fees, stockRows, transactions }: SK
             <p className="text-sm text-gray-400">No fees assigned</p>
           ) : (
             <div className="space-y-2">
-              {sku.sku_fees.map((f) => (
+              {sku.sku_fees.map((f) => {
+                const tier = f.fee_tier_id
+                  ? f.fees.fee_tiers?.find((t) => t.id === f.fee_tier_id)
+                  : null
+                return (
                 <div key={f.fee_id} className="flex justify-between text-sm">
                   <span className="text-gray-900">
                     {f.fees.name}
+                    {tier && (
+                      <span className="ml-1 text-xs text-blue-600 font-medium">
+                        ({tier.tier_name})
+                      </span>
+                    )}
                     <span className={`ml-1 text-xs ${
                       f.fees.fee_type === 'percentage' ? 'text-purple-600' : 'text-amber-600'
                     }`}>
@@ -184,7 +215,8 @@ export default function SKUDetailView({ sku, fees, stockRows, transactions }: SK
                       : `Rp ${Number(f.value).toLocaleString('id-ID')}`}
                   </span>
                 </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>

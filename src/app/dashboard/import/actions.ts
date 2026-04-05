@@ -24,6 +24,11 @@ export async function parseUpload(formData: FormData) {
   };
 }
 
+/** Normalize a product name for fuzzy matching: lowercase, collapse whitespace */
+function normalize(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
 export async function confirmImport(data: string) {
   const parsed = JSON.parse(data);
   const { orders: orderList, items } = parsed;
@@ -63,17 +68,20 @@ export async function confirmImport(data: string) {
     };
   }
 
-  // Fetch SKU lookup tables for auto-linking
+  // Fetch SKUs by name for auto-linking
   const [skusRes, variationsRes] = await Promise.all([
-    supabase.from("skus").select("id, sku_code"),
+    supabase.from("skus").select("id, name"),
     supabase.from("sku_variations").select("id, sku_id, variation_name"),
   ]);
 
-  const skuMap = new Map(
-    (skusRes.data ?? []).map((s) => [s.sku_code, s.id])
-  );
+  // Build product name → sku_id lookup (normalized)
+  const skuNameMap = new Map<string, string>();
+  for (const s of skusRes.data ?? []) {
+    skuNameMap.set(normalize(s.name), s.id);
+  }
+
   const variationMap = new Map(
-    (variationsRes.data ?? []).map((v) => [`${v.sku_id}:${v.variation_name}`, v.id])
+    (variationsRes.data ?? []).map((v) => [`${v.sku_id}:${normalize(v.variation_name)}`, v.id])
   );
 
   // Insert new orders
@@ -98,14 +106,14 @@ export async function confirmImport(data: string) {
     (orderRows ?? []).map((o: { id: string; order_number: string }) => [o.order_number, o.id])
   );
 
-  // Insert items with SKU linking
+  // Insert items with SKU linking by product name
   const itemInserts = newItems.map((item: { order_number: string; parent_sku: string; product_name: string; sku_reference: string | null; variation_name: string | null; original_price: number; discounted_price: number; quantity: number; buyer_paid: number; total_discount: number; seller_discount: number; shopee_discount: number; product_weight: string | null }) => {
     const order_id = orderIdMap.get(item.order_number);
-    const sku_id = item.sku_reference ? skuMap.get(item.sku_reference) ?? null : null;
+    const sku_id = skuNameMap.get(normalize(item.product_name)) ?? null;
 
     let variation_id = null;
     if (sku_id && item.variation_name) {
-      variation_id = variationMap.get(`${sku_id}:${item.variation_name}`) ?? null;
+      variation_id = variationMap.get(`${sku_id}:${normalize(item.variation_name)}`) ?? null;
     }
 
     return {

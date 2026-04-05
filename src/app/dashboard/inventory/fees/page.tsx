@@ -7,7 +7,7 @@ export default async function FeesPage() {
   const supabase = await createClient()
   const { data: fees } = await supabase
     .from('fees')
-    .select('*')
+    .select('*, fee_tiers(*)')
     .order('created_at', { ascending: false })
 
   return (
@@ -15,7 +15,7 @@ export default async function FeesPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Fee Registry</h1>
         <p className="text-sm text-gray-500 mt-1">
-          Manage fee types that can be assigned to SKUs. Each fee has a name and percentage.
+          Manage fee types that can be assigned to SKUs. Add tiers to pre-define value options.
         </p>
       </div>
 
