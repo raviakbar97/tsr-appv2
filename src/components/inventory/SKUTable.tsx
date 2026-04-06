@@ -38,12 +38,20 @@ interface SKUWithRelations {
   sku_fees: { fee_id: string; value: number; max_value: number | null; fee_tier_id: string | null; fees: Fee }[]
 }
 
+interface WarehouseItem {
+  id: string
+  name: string
+  unit: string
+  source_type: 'purchased' | 'produced'
+}
+
 interface SKUTableProps {
   skus: SKUWithRelations[]
   fees: Fee[]
+  warehouseItems?: WarehouseItem[]
 }
 
-export default function SKUTable({ skus, fees }: SKUTableProps) {
+export default function SKUTable({ skus, fees, warehouseItems = [] }: SKUTableProps) {
   const [search, setSearch] = useState('')
   const [editingSKU, setEditingSKU] = useState<SKUWithRelations | null>(null)
   const [showAdd, setShowAdd] = useState(false)
@@ -300,6 +308,7 @@ export default function SKUTable({ skus, fees }: SKUTableProps) {
         <SKUForm
           sku={editingSKU ?? undefined}
           fees={fees}
+          warehouseItems={warehouseItems}
           onClose={() => {
             setShowAdd(false)
             setEditingSKU(null)

@@ -12,7 +12,7 @@ export default async function SKUDetailPage({ params }: Props) {
   const { id } = await params
   const supabase = await createClient()
 
-  const [{ data: sku }, { data: fees }, { data: stockRows }, { data: transactions }] =
+  const [{ data: sku }, { data: fees }, { data: stockRows }, { data: transactions }, { data: warehouseItems }] =
     await Promise.all([
       supabase
         .from('skus')
@@ -26,6 +26,7 @@ export default async function SKUDetailPage({ params }: Props) {
         .select('*')
         .eq('sku_id', id)
         .order('created_at', { ascending: false }),
+      supabase.from('warehouse_items').select('id, name, unit, source_type').eq('is_active', true).order('name'),
     ])
 
   if (!sku) notFound()
@@ -36,6 +37,7 @@ export default async function SKUDetailPage({ params }: Props) {
       fees={fees ?? []}
       stockRows={stockRows ?? []}
       transactions={transactions ?? []}
+      warehouseItems={warehouseItems ?? []}
     />
   )
 }

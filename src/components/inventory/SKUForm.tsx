@@ -42,13 +42,23 @@ interface SKUData {
   sku_code: string
   base_price: number
   is_active?: boolean
+  warehouse_item_id?: string | null
+  warehouse_item_qty?: number | null
   sku_variations?: Variation[]
   sku_fees?: { fee_id: string; value: number; max_value: number | null; fee_tier_id: string | null }[]
+}
+
+interface WarehouseItem {
+  id: string
+  name: string
+  unit: string
+  source_type: 'purchased' | 'produced'
 }
 
 interface SKUFormProps {
   sku?: SKUData
   fees: Fee[]
+  warehouseItems?: WarehouseItem[]
   onClose: () => void
 }
 
@@ -57,11 +67,13 @@ interface VariationInput {
   base_price_override: string
 }
 
-export default function SKUForm({ sku, fees, onClose }: SKUFormProps) {
+export default function SKUForm({ sku, fees, warehouseItems = [], onClose }: SKUFormProps) {
   const isEdit = !!sku?.id
   const [name, setName] = useState(sku?.name ?? '')
   const [skuCode, setSkuCode] = useState(sku?.sku_code ?? '')
   const [basePrice, setBasePrice] = useState(sku?.base_price?.toString() ?? '0')
+  const [warehouseItemId, setWarehouseItemId] = useState(sku?.warehouse_item_id ?? '')
+  const [warehouseItemQty, setWarehouseItemQty] = useState(sku?.warehouse_item_qty?.toString() ?? '1')
   const [variations, setVariations] = useState<VariationInput[]>(
     sku?.sku_variations?.map((v) => ({
       variation_name: v.variation_name,
@@ -126,6 +138,8 @@ export default function SKUForm({ sku, fees, onClose }: SKUFormProps) {
       name: name.trim(),
       sku_code: skuCode.trim(),
       base_price: parseFloat(basePrice) || 0,
+      warehouse_item_id: warehouseItemId || null,
+      warehouse_item_qty: parseInt(warehouseItemQty) || 1,
       variations: parsedVariations,
       fees: feeAssignments.map((a) => ({
         fee_id: a.fee_id,
@@ -212,6 +226,44 @@ export default function SKUForm({ sku, fees, onClose }: SKUFormProps) {
           </div>
 
           <SKUVariations variations={variations} onChange={setVariations} />
+
+          {warehouseItems.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Linked Warehouse Item
+              </label>
+              <div className="flex gap-2">
+                <select
+                  value={warehouseItemId}
+                  onChange={(e) => setWarehouseItemId(e.target.value)}
+                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">None</option>
+                  {warehouseItems.map((wi) => (
+                    <option key={wi.id} value={wi.id}>
+                      {wi.name} ({wi.source_type})
+                    </option>
+                  ))}
+                </select>
+                {warehouseItemId && (
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={warehouseItemQty}
+                    onChange={(e) => setWarehouseItemQty(e.target.value.replace(/[^\d]/g, ''))}
+                    className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Qty"
+                    title="Qty of warehouse item consumed per 1 SKU sold"
+                  />
+                )}
+              </div>
+              {warehouseItemId && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Qty: how many warehouse units are consumed per 1 SKU sold
+                </p>
+              )}
+            </div>
+          )}
 
           <SKUFeeAssignment
             fees={fees}
