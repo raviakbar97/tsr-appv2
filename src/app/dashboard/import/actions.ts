@@ -3,6 +3,7 @@
 import { parseXlsx } from "@/lib/import/parser";
 import { mapRowsToOrders } from "@/lib/import/mapper";
 import { createClient } from "@/lib/supabase/server";
+import { deductWarehouseForOrder } from "@/app/dashboard/inventory/warehouse/actions";
 
 export async function parseUpload(formData: FormData) {
   const file = formData.get("file") as File;
@@ -139,6 +140,21 @@ export async function confirmImport(data: string) {
     const { error } = await supabase.from("order_items").insert(itemInserts);
     if (error) {
       return { error: `Failed to insert items: ${error.message}` };
+    }
+
+    // Auto-deduct warehouse stock for items linked to warehouse items
+    for (const order of newOrders) {
+      const orderId = orderIdMap.get(order.order_number);
+      if (!orderId) continue;
+      const orderItems = itemInserts.filter(
+        (i: { order_id: string }) => i.order_id === orderId
+      );
+      if (orderItems.length > 0) {
+        await deductWarehouseForOrder(orderId, orderItems.map((i: { sku_id: string | null; quantity: number }) => ({
+          sku_id: i.sku_id,
+          quantity: i.quantity,
+        })));
+      }
     }
   }
 

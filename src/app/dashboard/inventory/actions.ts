@@ -19,6 +19,8 @@ export async function createSKU(formData: {
   name: string
   sku_code: string
   base_price: number
+  warehouse_item_id: string | null
+  warehouse_item_qty: number
   variations: VariationInput[]
   fees: FeeInput[]
 }) {
@@ -35,6 +37,8 @@ export async function createSKU(formData: {
       name: formData.name,
       sku_code: formData.sku_code,
       base_price: formData.base_price,
+      warehouse_item_id: formData.warehouse_item_id,
+      warehouse_item_qty: formData.warehouse_item_qty || 1,
     })
     .select('id')
     .single()
@@ -77,6 +81,8 @@ export async function updateSKU(
     sku_code: string
     base_price: number
     is_active: boolean
+    warehouse_item_id: string | null
+    warehouse_item_qty: number
     variations: VariationInput[]
     fees: FeeInput[]
   }
@@ -94,6 +100,8 @@ export async function updateSKU(
       sku_code: formData.sku_code,
       base_price: formData.base_price,
       is_active: formData.is_active,
+      warehouse_item_id: formData.warehouse_item_id,
+      warehouse_item_qty: formData.warehouse_item_qty || 1,
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)

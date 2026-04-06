@@ -34,8 +34,17 @@ interface SKU {
   sku_code: string
   base_price: number
   is_active: boolean
+  warehouse_item_id?: string | null
+  warehouse_item_qty?: number | null
   sku_variations: Variation[]
   sku_fees: { fee_id: string; value: number; max_value: number | null; fee_tier_id: string | null; fees: Fee }[]
+}
+
+interface WarehouseItem {
+  id: string
+  name: string
+  unit: string
+  source_type: 'purchased' | 'produced'
 }
 
 interface StockRow {
@@ -61,9 +70,10 @@ interface SKUDetailViewProps {
   fees: Fee[]
   stockRows: StockRow[]
   transactions: Transaction[]
+  warehouseItems?: WarehouseItem[]
 }
 
-export default function SKUDetailView({ sku, fees, stockRows, transactions }: SKUDetailViewProps) {
+export default function SKUDetailView({ sku, fees, stockRows, transactions, warehouseItems = [] }: SKUDetailViewProps) {
   const [showEdit, setShowEdit] = useState(false)
   const [showStockForm, setShowStockForm] = useState(false)
 
@@ -101,6 +111,14 @@ export default function SKUDetailView({ sku, fees, stockRows, transactions }: SK
                 return min === max
                   ? `Rp ${Number(min).toLocaleString('id-ID')}`
                   : `Rp ${Number(min).toLocaleString('id-ID')} - ${Number(max).toLocaleString('id-ID')}`
+              })()}
+              {sku.warehouse_item_id && (() => {
+                const whItem = warehouseItems.find(w => w.id === sku.warehouse_item_id)
+                return whItem ? (
+                  <span className="ml-2 text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                    Warehouse: {whItem.name} (x{sku.warehouse_item_qty ?? 1})
+                  </span>
+                ) : null
               })()}
             </p>
           </div>
@@ -312,6 +330,7 @@ export default function SKUDetailView({ sku, fees, stockRows, transactions }: SK
         <SKUForm
           sku={sku}
           fees={fees}
+          warehouseItems={warehouseItems}
           onClose={() => setShowEdit(false)}
         />
       )}

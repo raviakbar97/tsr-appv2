@@ -11,6 +11,8 @@ import {
   LogOut,
   Receipt,
   ArrowLeftRight,
+  Warehouse,
+  ClipboardList,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -21,6 +23,8 @@ const navItems = [
   { href: "/dashboard/inventory", label: "Inventory", icon: Package },
   { href: "/dashboard/inventory/fees", label: "Fees", icon: Receipt },
   { href: "/dashboard/inventory/stock", label: "Stock", icon: ArrowLeftRight },
+  { href: "/dashboard/inventory/warehouse", label: "Warehouse", icon: Warehouse },
+  { href: "/dashboard/inventory/warehouse/po", label: "Purchase Orders", icon: ClipboardList },
   { href: "/dashboard/finance", label: "Finance", icon: DollarSign },
   { href: "/dashboard/import", label: "Import CSV", icon: Upload },
 ];

@@ -43,7 +43,7 @@ export interface ParsedImport {
 }
 
 /** Statuses to skip during import */
-const SKIPPED_STATUSES = ["belum bayar", "dibatalkan"];
+const SKIPPED_STATUSES = ["belum bayar", "batal"];
 
 /** Group raw rows by order_number, separating order-level vs item-level data.
  *  Rows with "Belum Dibayar" or "Dibatalkan" status are excluded. */
