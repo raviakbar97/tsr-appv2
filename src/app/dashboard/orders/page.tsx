@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import OrderTable from "@/components/orders/OrderTable";
+import { enrichOrderItems } from "@/lib/profit";
 
 export const dynamic = "force-dynamic";
 
@@ -92,67 +93,34 @@ export default async function OrdersPage() {
     feesBySku.set(sf.sku_id, list);
   }
 
-  // Enrich orders with calculated financial data
-  const ORDER_FLAT_FEE = 1250;
-
+  // Enrich orders with calculated financial data using shared logic
   const enrichedOrders = typedOrders.map(order => {
-    const rawItems = (order.order_items ?? []).map(item => {
-      const sellingPrice = Number(item.discounted_price) * item.quantity;
-
-      // Base price: prefer variation override, fallback to SKU base price
-      let basePrice: number | null = null;
-      if (item.variation_id && variationMap.has(item.variation_id)) {
-        const override = variationMap.get(item.variation_id);
-        if (override != null) basePrice = Number(override) * item.quantity;
-      } else if (item.sku_id && skuMap.has(item.sku_id)) {
-        basePrice = skuMap.get(item.sku_id)! * item.quantity;
-      }
-
-      // Admin fees for this item's SKU
-      let adminFee = 0;
-      if (item.sku_id && feesBySku.has(item.sku_id)) {
-        for (const fee of feesBySku.get(item.sku_id)!) {
-          let feeAmount: number;
-          if (fee.fee_type === "percentage") {
-            feeAmount = (fee.value / 100) * sellingPrice;
-          } else {
-            feeAmount = fee.value;
-          }
-          if (fee.max_value != null) feeAmount = Math.min(feeAmount, fee.max_value);
-          adminFee += feeAmount;
-        }
-      }
-      adminFee = Math.round(adminFee);
-
-      const margin = basePrice != null ? Math.round(sellingPrice - basePrice - adminFee) : null;
-
-      return {
-        product_name: item.product_name,
-        parent_sku: item.parent_sku,
-        variation_name: item.variation_name,
+    const enriched = enrichOrderItems(
+      (order.order_items ?? []).map(item => ({
+        sku_id: item.sku_id,
+        variation_id: item.variation_id,
+        discounted_price: Number(item.discounted_price),
         quantity: item.quantity,
-        selling_price: sellingPrice,
-        base_price: basePrice,
-        admin_fee: adminFee,
-        margin,
-      };
-    });
+      })),
+      skuMap,
+      variationMap,
+      feesBySku,
+    );
 
-    // Distribute flat per-order fee across items proportionally by selling price
-    const totalSelling = rawItems.reduce((s, i) => s + i.selling_price, 0);
-    let feeRemaining = ORDER_FLAT_FEE;
-    const items = rawItems.map((item, idx) => {
-      const share = idx < rawItems.length - 1
-        ? Math.round((item.selling_price / totalSelling) * ORDER_FLAT_FEE)
-        : feeRemaining;
-      feeRemaining -= share;
-      const admin_fee = item.admin_fee + share;
-      const margin = item.base_price != null ? item.selling_price - item.base_price - admin_fee : null;
-      return { ...item, admin_fee, margin: margin != null ? Math.round(margin) : null };
-    });
+    const rawItems = (order.order_items ?? []);
+    const items = enriched.map((e, i) => ({
+      product_name: rawItems[i].product_name,
+      parent_sku: rawItems[i].parent_sku,
+      variation_name: rawItems[i].variation_name,
+      quantity: rawItems[i].quantity,
+      selling_price: e.selling_price,
+      base_price: e.base_price,
+      admin_fee: e.admin_fee,
+      margin: e.margin,
+    }));
 
     // Order-level totals
-    const total_selling = totalSelling;
+    const total_selling = items.reduce((s, i) => s + i.selling_price, 0);
     const hasNullBase = items.some(i => i.base_price === null);
     const total_base = hasNullBase ? null : items.reduce((s, i) => s + (i.base_price ?? 0), 0);
     const total_admin_fee = items.reduce((s, i) => s + i.admin_fee, 0);

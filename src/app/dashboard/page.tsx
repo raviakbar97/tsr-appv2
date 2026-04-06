@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { enrichOrderItems } from "@/lib/profit";
 
 export const dynamic = "force-dynamic";
 
@@ -33,9 +34,9 @@ export default async function DashboardPage() {
   const totalOrders = orders.length;
   const totalRevenue = items.reduce((sum, i) => sum + Number(i.discounted_price) * i.quantity, 0);
 
-  // Fetch prices & fees for profit calc
-  const skuIds = [...new Set(items.map((i) => i.sku_id).filter(Boolean))] as string[];
-  const variationIds = [...new Set(items.map((i) => i.variation_id).filter(Boolean))] as string[];
+  // Fetch prices & fees — same approach as orders page
+  const skuIds = [...new Set(items.map(i => i.sku_id).filter(Boolean))] as string[];
+  const variationIds = [...new Set(items.map(i => i.variation_id).filter(Boolean))] as string[];
 
   const [skusPriceRes, variationPriceRes, feesRes] = await Promise.all([
     skuIds.length > 0 ? supabase.from("skus").select("id, base_price").in("id", skuIds) : Promise.resolve({ data: [] }),
@@ -43,8 +44,9 @@ export default async function DashboardPage() {
     skuIds.length > 0 ? supabase.from("sku_fees").select("sku_id, value, max_value, fees(fee_type)").in("sku_id", skuIds) : Promise.resolve({ data: [] }),
   ]);
 
-  const skuMap = new Map((skusPriceRes.data ?? []).map((s) => [s.id, Number(s.base_price)]));
-  const variationMap = new Map((variationPriceRes.data ?? []).map((v) => [v.id, v.base_price_override]));
+  // Build lookup maps — identical to orders page
+  const skuMap = new Map((skusPriceRes.data ?? []).map(s => [s.id, Number(s.base_price)]));
+  const variationMap = new Map((variationPriceRes.data ?? []).map(v => [v.id, v.base_price_override]));
 
   const feesBySku = new Map<string, { fee_type: string; value: number; max_value: number | null }[]>();
   for (const sf of (feesRes.data ?? [])) {
@@ -57,11 +59,7 @@ export default async function DashboardPage() {
     feesBySku.set(sf.sku_id, list);
   }
 
-  let totalProfit = 0;
-  let profitKnown = 0;
-  const ORDER_FLAT_FEE = 1250;
-
-  // Group items by order to distribute flat fee per order
+  // Group items by order, enrich using shared logic, sum margins
   const itemsByOrder = new Map<string, typeof items>();
   for (const i of items) {
     const list = itemsByOrder.get(i.order_id) ?? [];
@@ -69,45 +67,25 @@ export default async function DashboardPage() {
     itemsByOrder.set(i.order_id, list);
   }
 
+  let totalProfit = 0;
+  let profitKnown = 0;
+
   for (const [, orderItems] of itemsByOrder) {
-    // First pass: calculate per-item base price and sku admin fee
-    const enriched = orderItems.map(item => {
-      const sp = Number(item.discounted_price) * item.quantity;
-      let basePrice: number | null = null;
-      if (item.variation_id && variationMap.has(item.variation_id)) {
-        const o = variationMap.get(item.variation_id);
-        if (o != null) basePrice = Number(o) * item.quantity;
-      } else if (item.sku_id && skuMap.has(item.sku_id)) {
-        basePrice = skuMap.get(item.sku_id)! * item.quantity;
-      }
-      let adminFee = 0;
-      if (item.sku_id && feesBySku.has(item.sku_id)) {
-        for (const fee of feesBySku.get(item.sku_id)!) {
-          let fa = fee.fee_type === "percentage" ? (fee.value / 100) * sp : fee.value;
-          if (fee.max_value != null) fa = Math.min(fa, fee.max_value);
-          adminFee += fa;
-        }
-      }
-      return { sellingPrice: sp, basePrice, adminFee: Math.round(adminFee) };
-    });
+    const enriched = enrichOrderItems(
+      orderItems.map(item => ({
+        sku_id: item.sku_id,
+        variation_id: item.variation_id,
+        discounted_price: Number(item.discounted_price),
+        quantity: item.quantity,
+      })),
+      skuMap,
+      variationMap,
+      feesBySku,
+    );
 
-    // Second pass: distribute flat per-order fee proportionally (same as orders page)
-    const totalSelling = enriched.reduce((s, i) => s + i.sellingPrice, 0);
-    let feeRemaining = ORDER_FLAT_FEE;
-    const final = enriched.map((item, idx) => {
-      const share = idx < enriched.length - 1
-        ? Math.round((item.sellingPrice / totalSelling) * ORDER_FLAT_FEE)
-        : feeRemaining;
-      feeRemaining -= share;
-      const admin_fee = item.adminFee + share;
-      const margin = item.basePrice != null ? Math.round(item.sellingPrice - item.basePrice - admin_fee) : null;
-      return { margin };
-    });
-
-    // Sum margins of items with known base price
-    for (const f of final) {
-      if (f.margin != null) {
-        totalProfit += f.margin;
+    for (const e of enriched) {
+      if (e.margin != null) {
+        totalProfit += e.margin;
         profitKnown++;
       }
     }
