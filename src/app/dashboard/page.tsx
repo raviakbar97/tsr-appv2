@@ -59,36 +59,58 @@ export default async function DashboardPage() {
 
   let totalProfit = 0;
   let profitKnown = 0;
-  for (const item of items) {
-    const sp = Number(item.discounted_price) * item.quantity;
-    let basePrice: number | null = null;
-    if (item.variation_id && variationMap.has(item.variation_id)) {
-      const o = variationMap.get(item.variation_id);
-      if (o != null) basePrice = Number(o) * item.quantity;
-    } else if (item.sku_id && skuMap.has(item.sku_id)) {
-      basePrice = skuMap.get(item.sku_id)! * item.quantity;
-    }
-    let adminFee = 0;
-    if (item.sku_id && feesBySku.has(item.sku_id)) {
-      for (const fee of feesBySku.get(item.sku_id)!) {
-        let fa = fee.fee_type === "percentage" ? (fee.value / 100) * sp : fee.value;
-        if (fee.max_value != null) fa = Math.min(fa, fee.max_value);
-        adminFee += fa;
-      }
-    }
-    adminFee = Math.round(adminFee);
-    if (basePrice != null) {
-      totalProfit += Math.round(sp - basePrice - adminFee);
-      profitKnown++;
-    }
+  const ORDER_FLAT_FEE = 1250;
+
+  // Group items by order to distribute flat fee per order
+  const itemsByOrder = new Map<string, typeof items>();
+  for (const i of items) {
+    const list = itemsByOrder.get(i.order_id) ?? [];
+    list.push(i);
+    itemsByOrder.set(i.order_id, list);
   }
 
-  // Build order_id → items lookup
-  const orderItemsMap = new Map<string, typeof items>();
-  for (const i of items) {
-    const list = orderItemsMap.get(i.order_id) ?? [];
-    list.push(i);
-    orderItemsMap.set(i.order_id, list);
+  for (const [, orderItems] of itemsByOrder) {
+    // First pass: calculate per-item base price and sku admin fee
+    const enriched = orderItems.map(item => {
+      const sp = Number(item.discounted_price) * item.quantity;
+      let basePrice: number | null = null;
+      if (item.variation_id && variationMap.has(item.variation_id)) {
+        const o = variationMap.get(item.variation_id);
+        if (o != null) basePrice = Number(o) * item.quantity;
+      } else if (item.sku_id && skuMap.has(item.sku_id)) {
+        basePrice = skuMap.get(item.sku_id)! * item.quantity;
+      }
+      let adminFee = 0;
+      if (item.sku_id && feesBySku.has(item.sku_id)) {
+        for (const fee of feesBySku.get(item.sku_id)!) {
+          let fa = fee.fee_type === "percentage" ? (fee.value / 100) * sp : fee.value;
+          if (fee.max_value != null) fa = Math.min(fa, fee.max_value);
+          adminFee += fa;
+        }
+      }
+      return { sellingPrice: sp, basePrice, adminFee: Math.round(adminFee) };
+    });
+
+    // Second pass: distribute flat per-order fee proportionally (same as orders page)
+    const totalSelling = enriched.reduce((s, i) => s + i.sellingPrice, 0);
+    let feeRemaining = ORDER_FLAT_FEE;
+    const final = enriched.map((item, idx) => {
+      const share = idx < enriched.length - 1
+        ? Math.round((item.sellingPrice / totalSelling) * ORDER_FLAT_FEE)
+        : feeRemaining;
+      feeRemaining -= share;
+      const admin_fee = item.adminFee + share;
+      const margin = item.basePrice != null ? Math.round(item.sellingPrice - item.basePrice - admin_fee) : null;
+      return { margin };
+    });
+
+    // Sum margins of items with known base price
+    for (const f of final) {
+      if (f.margin != null) {
+        totalProfit += f.margin;
+        profitKnown++;
+      }
+    }
   }
 
   const recentOrders = orders.slice(0, 5);
@@ -153,7 +175,7 @@ export default async function DashboardPage() {
         ) : (
           <div className="space-y-3">
             {recentOrders.map((o) => {
-              const oItems = orderItemsMap.get(o.id) ?? [];
+              const oItems = itemsByOrder.get(o.id) ?? [];
               const itemCount = oItems.reduce((s, i) => s + i.quantity, 0);
               const orderTotal = oItems.reduce((s, i) => s + Number(i.discounted_price) * i.quantity, 0);
               const productSummary = oItems.length <= 2
