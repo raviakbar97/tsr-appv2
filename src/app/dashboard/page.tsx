@@ -70,12 +70,8 @@ export default async function DashboardPage() {
   }
 
   for (const [, orderItems] of itemsByOrder) {
-    const orderSelling = orderItems.reduce((s, i) => s + Number(i.discounted_price) * i.quantity, 0);
-    let orderAdmin = 0;
-    let orderBase: number | null = 0;
-    let orderHasNull = false;
-
-    for (const item of orderItems) {
+    // First pass: calculate per-item base price and sku admin fee
+    const enriched = orderItems.map(item => {
       const sp = Number(item.discounted_price) * item.quantity;
       let basePrice: number | null = null;
       if (item.variation_id && variationMap.has(item.variation_id)) {
@@ -84,9 +80,6 @@ export default async function DashboardPage() {
       } else if (item.sku_id && skuMap.has(item.sku_id)) {
         basePrice = skuMap.get(item.sku_id)! * item.quantity;
       }
-      if (basePrice == null) orderHasNull = true;
-      else orderBase! += basePrice;
-
       let adminFee = 0;
       if (item.sku_id && feesBySku.has(item.sku_id)) {
         for (const fee of feesBySku.get(item.sku_id)!) {
@@ -95,13 +88,28 @@ export default async function DashboardPage() {
           adminFee += fa;
         }
       }
-      orderAdmin += Math.round(adminFee);
-    }
-    orderAdmin += ORDER_FLAT_FEE; // flat per-order fee
+      return { sellingPrice: sp, basePrice, adminFee: Math.round(adminFee) };
+    });
 
-    if (!orderHasNull && orderBase != null) {
-      totalProfit += Math.round(orderSelling - orderBase - orderAdmin);
-      profitKnown += orderItems.length;
+    // Second pass: distribute flat per-order fee proportionally (same as orders page)
+    const totalSelling = enriched.reduce((s, i) => s + i.sellingPrice, 0);
+    let feeRemaining = ORDER_FLAT_FEE;
+    const final = enriched.map((item, idx) => {
+      const share = idx < enriched.length - 1
+        ? Math.round((item.sellingPrice / totalSelling) * ORDER_FLAT_FEE)
+        : feeRemaining;
+      feeRemaining -= share;
+      const admin_fee = item.adminFee + share;
+      const margin = item.basePrice != null ? Math.round(item.sellingPrice - item.basePrice - admin_fee) : null;
+      return { margin };
+    });
+
+    // Sum margins of items with known base price
+    for (const f of final) {
+      if (f.margin != null) {
+        totalProfit += f.margin;
+        profitKnown++;
+      }
     }
   }
 
