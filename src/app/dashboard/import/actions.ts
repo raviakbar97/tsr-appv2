@@ -150,8 +150,9 @@ export async function confirmImport(data: string) {
         (i: { order_id: string }) => i.order_id === orderId
       );
       if (orderItems.length > 0) {
-        await deductWarehouseForOrder(orderId, orderItems.map((i: { sku_id: string | null; quantity: number }) => ({
+        await deductWarehouseForOrder(orderId, orderItems.map((i: { sku_id: string | null; variation_id: string | null; quantity: number }) => ({
           sku_id: i.sku_id,
+          variation_id: i.variation_id,
           quantity: i.quantity,
         })));
       }

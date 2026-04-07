@@ -195,7 +195,7 @@ export async function createManualOrders(
       // Deduct warehouse stock
       await deductWarehouseForOrder(
         orderId,
-        itemInserts.map((i) => ({ sku_id: i.sku_id, quantity: i.quantity }))
+        itemInserts.map((i) => ({ sku_id: i.sku_id, variation_id: i.variation_id, quantity: i.quantity }))
       );
     }
 

@@ -26,6 +26,8 @@ interface Variation {
   id: string
   variation_name: string
   base_price_override: number | null
+  warehouse_item_id?: string | null
+  warehouse_item_qty?: number | null
 }
 
 interface SKU {
@@ -112,7 +114,7 @@ export default function SKUDetailView({ sku, fees, stockRows, transactions, ware
                   ? `Rp ${Number(min).toLocaleString('id-ID')}`
                   : `Rp ${Number(min).toLocaleString('id-ID')} - ${Number(max).toLocaleString('id-ID')}`
               })()}
-              {sku.warehouse_item_id && (() => {
+              {sku.warehouse_item_id && sku.sku_variations.length === 0 && (() => {
                 const whItem = warehouseItems.find(w => w.id === sku.warehouse_item_id)
                 return whItem ? (
                   <span className="ml-2 text-xs text-[var(--primary)] bg-[var(--primary-light)] px-2 py-0.5 rounded-full">
@@ -171,19 +173,32 @@ export default function SKUDetailView({ sku, fees, stockRows, transactions, ware
                 <tr className="text-[var(--muted)] text-xs">
                   <th className="text-left pb-2 font-medium">Name</th>
                   <th className="text-right pb-2 font-medium">Price Override</th>
+                  <th className="text-right pb-2 font-medium">Warehouse</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {sku.sku_variations.map((v) => (
-                  <tr key={v.id}>
-                    <td className="py-2 text-[var(--foreground)]">{v.variation_name}</td>
-                    <td className="py-2 text-right text-[var(--foreground-secondary)]">
-                      {v.base_price_override
-                        ? `Rp ${Number(v.base_price_override).toLocaleString('id-ID')}`
-                        : '-'}
-                    </td>
-                  </tr>
-                ))}
+                {sku.sku_variations.map((v) => {
+                  const whItem = v.warehouse_item_id ? warehouseItems.find(w => w.id === v.warehouse_item_id) : null
+                  return (
+                    <tr key={v.id}>
+                      <td className="py-2 text-[var(--foreground)]">{v.variation_name}</td>
+                      <td className="py-2 text-right text-[var(--foreground-secondary)]">
+                        {v.base_price_override
+                          ? `Rp ${Number(v.base_price_override).toLocaleString('id-ID')}`
+                          : '-'}
+                      </td>
+                      <td className="py-2 text-right">
+                        {whItem ? (
+                          <span className="text-xs text-[var(--primary)] bg-[var(--primary-light)] px-2 py-0.5 rounded-full">
+                            {whItem.name} (x{v.warehouse_item_qty ?? 1})
+                          </span>
+                        ) : (
+                          <span className="text-[var(--muted)]">-</span>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           )}

@@ -26,6 +26,8 @@ interface Variation {
   id?: string
   variation_name: string
   base_price_override: number | null
+  warehouse_item_id?: string | null
+  warehouse_item_qty?: number | null
 }
 
 interface FeeAssignment {
@@ -65,6 +67,8 @@ interface SKUFormProps {
 interface VariationInput {
   variation_name: string
   base_price_override: string
+  warehouse_item_id: string
+  warehouse_item_qty: string
 }
 
 export default function SKUForm({ sku, fees, warehouseItems = [], onClose }: SKUFormProps) {
@@ -78,6 +82,8 @@ export default function SKUForm({ sku, fees, warehouseItems = [], onClose }: SKU
     sku?.sku_variations?.map((v) => ({
       variation_name: v.variation_name,
       base_price_override: v.base_price_override?.toString() ?? '',
+      warehouse_item_id: v.warehouse_item_id ?? '',
+      warehouse_item_qty: v.warehouse_item_qty?.toString() ?? '1',
     })) ?? []
   )
   const [feeAssignments, setFeeAssignments] = useState<FeeAssignment[]>(
@@ -132,6 +138,8 @@ export default function SKUForm({ sku, fees, warehouseItems = [], onClose }: SKU
       .map((v) => ({
         variation_name: v.variation_name.trim(),
         base_price_override: v.base_price_override ? parseFloat(v.base_price_override) : null,
+        warehouse_item_id: v.warehouse_item_id || null,
+        warehouse_item_qty: parseInt(v.warehouse_item_qty) || 1,
       }))
 
     const data = {
@@ -225,9 +233,9 @@ export default function SKUForm({ sku, fees, warehouseItems = [], onClose }: SKU
             </div>
           </div>
 
-          <SKUVariations variations={variations} onChange={setVariations} />
+          <SKUVariations variations={variations} onChange={setVariations} warehouseItems={warehouseItems} />
 
-          {warehouseItems.length > 0 && (
+          {warehouseItems.length > 0 && variations.length === 0 && (
             <div>
               <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-1">
                 Linked Warehouse Item

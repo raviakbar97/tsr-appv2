@@ -6,6 +6,8 @@ import { revalidatePath } from 'next/cache'
 interface VariationInput {
   variation_name: string
   base_price_override: number | null
+  warehouse_item_id: string | null
+  warehouse_item_qty: number
 }
 
 interface FeeInput {
@@ -52,6 +54,8 @@ export async function createSKU(formData: {
       sku_id: sku.id,
       variation_name: v.variation_name,
       base_price_override: v.base_price_override,
+      warehouse_item_id: v.warehouse_item_id,
+      warehouse_item_qty: v.warehouse_item_qty || 1,
     }))
     const { error: varError } = await supabase.from('sku_variations').insert(variations)
     if (varError) return { error: varError.message }
@@ -115,6 +119,8 @@ export async function updateSKU(
       sku_id: id,
       variation_name: v.variation_name,
       base_price_override: v.base_price_override,
+      warehouse_item_id: v.warehouse_item_id,
+      warehouse_item_qty: v.warehouse_item_qty || 1,
     }))
     const { error: varError } = await supabase.from('sku_variations').insert(variations)
     if (varError) return { error: varError.message }
