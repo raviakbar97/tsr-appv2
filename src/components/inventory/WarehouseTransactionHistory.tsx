@@ -33,10 +33,10 @@ interface WarehouseTransactionHistoryProps {
 }
 
 const typeLabels: Record<string, { label: string; color: string }> = {
-  in: { label: 'Stock In', color: 'bg-green-50 text-green-700' },
-  out: { label: 'Stock Out', color: 'bg-red-50 text-red-700' },
+  in: { label: 'Stock In', color: 'bg-green-50 text-[var(--accent)]' },
+  out: { label: 'Stock Out', color: 'bg-[var(--danger-light)] text-[var(--danger)]' },
   production: { label: 'Production', color: 'bg-purple-50 text-purple-700' },
-  order_deduction: { label: 'Order Deduction', color: 'bg-amber-50 text-amber-700' },
+  order_deduction: { label: 'Order Deduction', color: 'bg-amber-50 text-[var(--warning)]' },
 }
 
 export default function WarehouseTransactionHistory({ item, onClose }: WarehouseTransactionHistoryProps) {
@@ -65,37 +65,37 @@ export default function WarehouseTransactionHistory({ item, onClose }: Warehouse
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-2xl shadow-xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-[var(--surface)] rounded-xl p-6 w-full max-w-2xl shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">
             {item.name} — Details
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="text-[var(--muted)] hover:text-[var(--foreground-secondary)]">
             <X size={20} />
           </button>
         </div>
 
         {/* Item Info */}
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="bg-gray-50 rounded-lg p-3">
-            <p className="text-xs text-gray-500 mb-1">Type</p>
+          <div className="bg-[var(--surface-hover)] rounded-lg p-3">
+            <p className="text-xs text-[var(--muted)] mb-1">Type</p>
             <span className={`inline-flex items-center gap-1 text-sm font-medium ${
-              item.source_type === 'purchased' ? 'text-blue-700' : 'text-purple-700'
+              item.source_type === 'purchased' ? 'text-[var(--primary)]' : 'text-purple-700'
             }`}>
               {item.source_type === 'purchased' ? <ShoppingCart size={14} /> : <Factory size={14} />}
               {item.source_type === 'purchased' ? 'Purchased' : 'Produced'}
             </span>
           </div>
-          <div className="bg-gray-50 rounded-lg p-3">
-            <p className="text-xs text-gray-500 mb-1">Current Stock</p>
-            <p className="text-sm font-bold text-gray-900">{item.stock} {item.unit}</p>
+          <div className="bg-[var(--surface-hover)] rounded-lg p-3">
+            <p className="text-xs text-[var(--muted)] mb-1">Current Stock</p>
+            <p className="text-sm font-bold text-[var(--foreground)]">{item.stock} {item.unit}</p>
           </div>
-          <div className="bg-gray-50 rounded-lg p-3">
-            <p className="text-xs text-gray-500 mb-1">Buying Price</p>
-            <p className="text-sm font-medium text-gray-900">
+          <div className="bg-[var(--surface-hover)] rounded-lg p-3">
+            <p className="text-xs text-[var(--muted)] mb-1">Buying Price</p>
+            <p className="text-sm font-medium text-[var(--foreground)]">
               Rp {Number(item.source_type === 'produced' && bomCost > 0 ? bomCost : item.buying_price).toLocaleString('id-ID')}
               {item.source_type === 'produced' && bomCost > 0 && (
-                <span className="text-xs text-gray-500 ml-1">(BOM cost)</span>
+                <span className="text-xs text-[var(--muted)] ml-1">(BOM cost)</span>
               )}
             </p>
           </div>
@@ -104,11 +104,11 @@ export default function WarehouseTransactionHistory({ item, onClose }: Warehouse
         {/* BOM Breakdown */}
         {item.source_type === 'produced' && item.warehouse_bom && item.warehouse_bom.length > 0 && (
           <div className="mb-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Bill of Materials</h3>
-            <div className="bg-gray-50 rounded-lg p-3">
+            <h3 className="text-sm font-semibold text-[var(--foreground)] mb-2">Bill of Materials</h3>
+            <div className="bg-[var(--surface-hover)] rounded-lg p-3">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-gray-500 text-xs">
+                  <tr className="text-[var(--muted)] text-xs">
                     <th className="text-left pb-2 font-medium">Ingredient</th>
                     <th className="text-right pb-2 font-medium">Qty</th>
                     <th className="text-right pb-2 font-medium">Cost</th>
@@ -117,17 +117,17 @@ export default function WarehouseTransactionHistory({ item, onClose }: Warehouse
                 <tbody className="divide-y divide-gray-100">
                   {item.warehouse_bom.map((b, i) => (
                     <tr key={i}>
-                      <td className="py-1.5 text-gray-900">{b.ingredient?.name ?? 'Unknown'}</td>
-                      <td className="py-1.5 text-right text-gray-700">{b.quantity_per_unit}</td>
-                      <td className="py-1.5 text-right text-gray-700">
+                      <td className="py-1.5 text-[var(--foreground)]">{b.ingredient?.name ?? 'Unknown'}</td>
+                      <td className="py-1.5 text-right text-[var(--foreground-secondary)]">{b.quantity_per_unit}</td>
+                      <td className="py-1.5 text-right text-[var(--foreground-secondary)]">
                         Rp {Number(b.ingredient ? b.ingredient.buying_price * b.quantity_per_unit : 0).toLocaleString('id-ID')}
                       </td>
                     </tr>
                   ))}
                   <tr className="font-medium">
-                    <td className="py-1.5 text-gray-900">Total</td>
+                    <td className="py-1.5 text-[var(--foreground)]">Total</td>
                     <td className="py-1.5"></td>
-                    <td className="py-1.5 text-right text-gray-900">
+                    <td className="py-1.5 text-right text-[var(--foreground)]">
                       Rp {Number(bomCost).toLocaleString('id-ID')}
                     </td>
                   </tr>
@@ -139,15 +139,15 @@ export default function WarehouseTransactionHistory({ item, onClose }: Warehouse
 
         {/* Transaction History */}
         <div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-2">Transaction History</h3>
+          <h3 className="text-sm font-semibold text-[var(--foreground)] mb-2">Transaction History</h3>
           {loading ? (
-            <p className="text-sm text-gray-500">Loading...</p>
+            <p className="text-sm text-[var(--muted)]">Loading...</p>
           ) : transactions.length === 0 ? (
-            <p className="text-sm text-gray-500">No transactions yet</p>
+            <p className="text-sm text-[var(--muted)]">No transactions yet</p>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-gray-500 text-xs">
+                <tr className="text-[var(--muted)] text-xs">
                   <th className="text-left pb-2 font-medium">Date</th>
                   <th className="text-left pb-2 font-medium">Type</th>
                   <th className="text-right pb-2 font-medium">Qty</th>
@@ -157,7 +157,7 @@ export default function WarehouseTransactionHistory({ item, onClose }: Warehouse
               <tbody className="divide-y divide-gray-50">
                 {transactions.map((t) => (
                   <tr key={t.id}>
-                    <td className="py-2 text-gray-600">
+                    <td className="py-2 text-[var(--foreground-secondary)]">
                       {new Date(t.created_at).toLocaleDateString('id-ID', {
                         day: '2-digit',
                         month: 'short',
@@ -167,12 +167,12 @@ export default function WarehouseTransactionHistory({ item, onClose }: Warehouse
                       })}
                     </td>
                     <td className="py-2">
-                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${typeLabels[t.type]?.color ?? 'bg-gray-100 text-gray-700'}`}>
+                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${typeLabels[t.type]?.color ?? 'bg-[var(--surface-hover)] text-[var(--foreground-secondary)]'}`}>
                         {typeLabels[t.type]?.label ?? t.type}
                       </span>
                     </td>
-                    <td className="py-2 text-right font-medium text-gray-900">{t.quantity}</td>
-                    <td className="py-2 text-gray-500">{t.note ?? '-'}</td>
+                    <td className="py-2 text-right font-medium text-[var(--foreground)]">{t.quantity}</td>
+                    <td className="py-2 text-[var(--muted)]">{t.note ?? '-'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -183,7 +183,7 @@ export default function WarehouseTransactionHistory({ item, onClose }: Warehouse
         <div className="flex justify-end mt-4">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+            className="px-4 py-2 text-sm font-medium text-[var(--foreground-secondary)] bg-[var(--surface-hover)] rounded-lg hover:bg-[var(--border)]"
           >
             Close
           </button>

@@ -66,7 +66,7 @@ export default function UploadZone({ onParsed }: UploadZoneProps) {
         onDrop={handleDrop}
         className={`
           border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-colors
-          ${dragOver ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"}
+          ${dragOver ? "border-[var(--primary)] bg-[var(--primary-light)]" : "border-[var(--border-strong)] hover:border-[var(--border-strong)]"}
         `}
       >
         <input
@@ -83,18 +83,18 @@ export default function UploadZone({ onParsed }: UploadZoneProps) {
         {loading ? (
           <Loader2 size={48} className="mx-auto text-blue-500 mb-4 animate-spin" />
         ) : (
-          <FileSpreadsheet size={48} className="mx-auto text-gray-500 mb-4" />
+          <FileSpreadsheet size={48} className="mx-auto text-[var(--muted)] mb-4" />
         )}
 
-        <h3 className="text-lg font-medium text-gray-900 mb-1">
+        <h3 className="text-lg font-medium text-[var(--foreground)] mb-1">
           {loading ? "Parsing file..." : "Upload XLSX"}
         </h3>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-[var(--foreground-secondary)]">
           Drag & drop or click to select a Shopee order export file
         </p>
         <div className="mt-2 flex items-center justify-center gap-2">
-          <Upload size={14} className="text-gray-500" />
-          <span className="text-xs text-gray-500">.xlsx, .xls</span>
+          <Upload size={14} className="text-[var(--muted)]" />
+          <span className="text-xs text-[var(--muted)]">.xlsx, .xls</span>
         </div>
       </div>
 

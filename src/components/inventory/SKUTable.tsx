@@ -111,20 +111,20 @@ export default function SKUTable({ skus, fees, warehouseItems = [] }: SKUTablePr
     <>
       <div className="flex items-center justify-between mb-4 gap-4">
         <div className="relative flex-1 max-w-sm">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search SKU name or code..."
-            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-9 pr-3 py-2 border border-[var(--border-strong)] rounded-lg text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
           />
         </div>
         {selectMode ? (
           <div className="flex items-center gap-2">
             <button
               onClick={exitSelectMode}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="px-4 py-2 text-sm font-medium text-[var(--foreground-secondary)] bg-[var(--surface)] border border-[var(--border-strong)] rounded-lg hover:bg-[var(--surface-hover)]"
             >
               Cancel
             </button>
@@ -140,14 +140,14 @@ export default function SKUTable({ skus, fees, warehouseItems = [] }: SKUTablePr
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSelectMode(true)}
-              className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-red-600"
+              className="p-2 rounded-lg text-[var(--muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--danger)]"
               title="Mass delete"
             >
               <Trash2 size={18} />
             </button>
             <button
               onClick={() => setShowAdd(true)}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 whitespace-nowrap"
+              className="px-4 py-2 text-sm font-medium text-white bg-[var(--primary)] rounded-lg hover:bg-[var(--primary-hover)] whitespace-nowrap"
             >
               Add SKU
             </button>
@@ -155,9 +155,9 @@ export default function SKUTable({ skus, fees, warehouseItems = [] }: SKUTablePr
         )}
       </div>
 
-      <div className="border border-gray-200 rounded-xl overflow-hidden">
+      <div className="border border-[var(--border)] rounded-xl overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50">
+          <thead className="bg-[var(--surface-hover)]">
             <tr>
               {selectMode && (
                 <th className="px-4 py-3 w-10">
@@ -165,23 +165,23 @@ export default function SKUTable({ skus, fees, warehouseItems = [] }: SKUTablePr
                     type="checkbox"
                     checked={filtered.length > 0 && selectedIds.size === filtered.length}
                     onChange={toggleSelectAll}
-                    className="rounded border-gray-300"
+                    className="rounded border-[var(--border-strong)]"
                   />
                 </th>
               )}
-              <th className="text-left px-4 py-3 font-medium text-gray-600">SKU Code</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Base Price</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Variations</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Fees</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-              {!selectMode && <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>}
+              <th className="text-left px-4 py-3 font-medium text-[var(--foreground-secondary)]">SKU Code</th>
+              <th className="text-left px-4 py-3 font-medium text-[var(--foreground-secondary)]">Name</th>
+              <th className="text-left px-4 py-3 font-medium text-[var(--foreground-secondary)]">Base Price</th>
+              <th className="text-left px-4 py-3 font-medium text-[var(--foreground-secondary)]">Variations</th>
+              <th className="text-left px-4 py-3 font-medium text-[var(--foreground-secondary)]">Fees</th>
+              <th className="text-left px-4 py-3 font-medium text-[var(--foreground-secondary)]">Status</th>
+              {!selectMode && <th className="text-right px-4 py-3 font-medium text-[var(--foreground-secondary)]">Actions</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={selectMode ? 7 : 8} className="text-center py-8 text-gray-400">
+                <td colSpan={selectMode ? 7 : 8} className="text-center py-8 text-[var(--muted)]">
                   {skus.length === 0
                     ? 'No SKUs yet. Add your first SKU to get started.'
                     : 'No SKUs match your search.'}
@@ -189,20 +189,20 @@ export default function SKUTable({ skus, fees, warehouseItems = [] }: SKUTablePr
               </tr>
             ) : (
               filtered.map((sku) => (
-                <tr key={sku.id} className={`hover:bg-gray-50 ${selectedIds.has(sku.id) ? 'bg-red-50' : ''}`}>
+                <tr key={sku.id} className={`hover:bg-[var(--surface-hover)] ${selectedIds.has(sku.id) ? 'bg-[var(--danger-light)]' : ''}`}>
                   {selectMode && (
                     <td className="px-4 py-3">
                       <input
                         type="checkbox"
                         checked={selectedIds.has(sku.id)}
                         onChange={() => toggleSelect(sku.id)}
-                        className="rounded border-gray-300"
+                        className="rounded border-[var(--border-strong)]"
                       />
                     </td>
                   )}
-                  <td className="px-4 py-3 font-mono text-xs text-gray-600">{sku.sku_code}</td>
-                  <td className="px-4 py-3 font-medium text-gray-900">{sku.name}</td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-4 py-3 font-mono text-xs text-[var(--foreground-secondary)]">{sku.sku_code}</td>
+                  <td className="px-4 py-3 font-medium text-[var(--foreground)]">{sku.name}</td>
+                  <td className="px-4 py-3 text-[var(--foreground-secondary)]">
                     {sku.sku_variations.length > 0
                       ? (() => {
                           const prices = sku.sku_variations
@@ -219,7 +219,7 @@ export default function SKUTable({ skus, fees, warehouseItems = [] }: SKUTablePr
                   </td>
                   <td className="px-4 py-3">
                     {sku.sku_variations.length > 0 ? (
-                      <span className="text-gray-600">
+                      <span className="text-[var(--foreground-secondary)]">
                         {(() => {
                           const names = sku.sku_variations.map((v) => v.variation_name)
                           const show = names.slice(0, 2)
@@ -230,7 +230,7 @@ export default function SKUTable({ skus, fees, warehouseItems = [] }: SKUTablePr
                         })()}
                       </span>
                     ) : (
-                      <span className="text-gray-400">-</span>
+                      <span className="text-[var(--muted)]">-</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
@@ -242,22 +242,22 @@ export default function SKUTable({ skus, fees, warehouseItems = [] }: SKUTablePr
                         .filter((f) => f.fees.fee_type === 'fixed')
                         .reduce((s, f) => s + f.value, 0)
                       return (
-                        <span className="text-gray-600">
+                        <span className="text-[var(--foreground-secondary)]">
                           {pct > 0 && <span className="text-purple-600">{pct}%</span>}
-                          {pct > 0 && fixed > 0 && <span className="text-gray-500"> + </span>}
-                          {fixed > 0 && <span className="text-amber-600">Rp {Number(fixed).toLocaleString('id-ID')}</span>}
+                          {pct > 0 && fixed > 0 && <span className="text-[var(--muted)]"> + </span>}
+                          {fixed > 0 && <span className="text-[var(--warning)]">Rp {Number(fixed).toLocaleString('id-ID')}</span>}
                         </span>
                       )
                     })() : (
-                      <span className="text-gray-400">-</span>
+                      <span className="text-[var(--muted)]">-</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
                     <span
                       className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
                         sku.is_active
-                          ? 'bg-green-50 text-green-700'
-                          : 'bg-gray-100 text-gray-500'
+                          ? 'bg-green-50 text-[var(--accent)]'
+                          : 'bg-[var(--surface-hover)] text-[var(--muted)]'
                       }`}
                     >
                       {sku.is_active ? 'Active' : 'Inactive'}
@@ -268,28 +268,28 @@ export default function SKUTable({ skus, fees, warehouseItems = [] }: SKUTablePr
                       <div className="flex items-center justify-end gap-1">
                         <Link
                           href={`/dashboard/inventory/${sku.id}`}
-                          className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-blue-600"
+                          className="p-1.5 rounded-lg hover:bg-[var(--surface-hover)] text-[var(--muted)] hover:text-[var(--primary)]"
                           title="View details"
                         >
                           <Eye size={16} />
                         </Link>
                         <button
                           onClick={() => handleToggle(sku.id, sku.is_active)}
-                          className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600"
+                          className="p-1.5 rounded-lg hover:bg-[var(--surface-hover)] text-[var(--muted)] hover:text-[var(--foreground-secondary)]"
                           title={sku.is_active ? 'Deactivate' : 'Activate'}
                         >
                           {sku.is_active ? <PowerOff size={16} /> : <Power size={16} />}
                         </button>
                         <button
                           onClick={() => setEditingSKU(sku)}
-                          className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-blue-600"
+                          className="p-1.5 rounded-lg hover:bg-[var(--surface-hover)] text-[var(--muted)] hover:text-[var(--primary)]"
                           title="Edit"
                         >
                           <Pencil size={16} />
                         </button>
                         <button
                           onClick={() => handleDelete(sku.id)}
-                          className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-red-600"
+                          className="p-1.5 rounded-lg hover:bg-[var(--surface-hover)] text-[var(--muted)] hover:text-[var(--danger)]"
                           title="Delete"
                         >
                           <Trash2 size={16} />

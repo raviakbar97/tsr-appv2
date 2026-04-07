@@ -112,10 +112,10 @@ export default function PurchaseOrderForm({ warehouseItems, onClose }: PurchaseO
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-2xl shadow-xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-[var(--surface)] rounded-xl p-6 w-full max-w-2xl shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">New Purchase Order</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">New Purchase Order</h2>
+          <button onClick={onClose} className="text-[var(--muted)] hover:text-[var(--foreground-secondary)]">
             <X size={20} />
           </button>
         </div>
@@ -123,23 +123,23 @@ export default function PurchaseOrderForm({ warehouseItems, onClose }: PurchaseO
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">PO Number</label>
+              <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-1">PO Number</label>
               <input
                 type="text"
                 value={poNumber}
                 onChange={(e) => setPoNumber(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                 placeholder="e.g. PO-2026-001"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Supplier</label>
+              <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-1">Supplier</label>
               <input
                 type="text"
                 value={supplier}
                 onChange={(e) => setSupplier(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                 placeholder="Vendor name"
                 required
               />
@@ -147,12 +147,12 @@ export default function PurchaseOrderForm({ warehouseItems, onClose }: PurchaseO
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Note</label>
+            <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-1">Note</label>
             <input
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
               placeholder="Optional note"
             />
           </div>
@@ -160,11 +160,11 @@ export default function PurchaseOrderForm({ warehouseItems, onClose }: PurchaseO
           {/* Items */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-gray-700">Items</label>
+              <label className="text-sm font-medium text-[var(--foreground-secondary)]">Items</label>
               <button
                 type="button"
                 onClick={addRow}
-                className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                className="text-xs text-[var(--primary)] hover:text-[var(--primary)] flex items-center gap-1"
               >
                 <Plus size={14} /> Add Item
               </button>
@@ -184,7 +184,7 @@ export default function PurchaseOrderForm({ warehouseItems, onClose }: PurchaseO
                     <select
                       value={row.warehouse_item_id}
                       onChange={(e) => updateRow(i, 'warehouse_item_id', e.target.value)}
-                      className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                     >
                       <option value="">Select item...</option>
                       {purchasedItems.map((item) => (
@@ -197,7 +197,7 @@ export default function PurchaseOrderForm({ warehouseItems, onClose }: PurchaseO
                       type="number"
                       value={row.quantity || ''}
                       onChange={(e) => updateRow(i, 'quantity', e.target.value)}
-                      className="w-16 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-16 border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                       placeholder="Qty"
                       min="1"
                     />
@@ -205,7 +205,7 @@ export default function PurchaseOrderForm({ warehouseItems, onClose }: PurchaseO
                       <select
                         value={row.selected_unit || selectedItem?.unit || ''}
                         onChange={(e) => updateRow(i, 'selected_unit', e.target.value)}
-                        className="w-20 border border-gray-300 rounded-lg px-2 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-20 border border-[var(--border-strong)] rounded-lg px-2 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                       >
                         {itemUnits.map((u) => (
                           <option key={u.name} value={u.name}>
@@ -214,20 +214,20 @@ export default function PurchaseOrderForm({ warehouseItems, onClose }: PurchaseO
                         ))}
                       </select>
                     ) : (
-                      <span className="w-20 text-xs text-gray-500 text-center">{selectedItem?.unit || ''}</span>
+                      <span className="w-20 text-xs text-[var(--muted)] text-center">{selectedItem?.unit || ''}</span>
                     )}
                     <input
                       type="text"
                       inputMode="decimal"
                       value={row.unit_price || ''}
                       onChange={(e) => updateRow(i, 'unit_price', sanitizePrice(e.target.value))}
-                      className="w-28 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-28 border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                       placeholder="Unit price"
                     />
                     <button
                       type="button"
                       onClick={() => removeRow(i)}
-                      className="p-1.5 text-gray-500 hover:text-red-600"
+                      className="p-1.5 text-[var(--muted)] hover:text-[var(--danger)]"
                       disabled={rows.length <= 1}
                     >
                       <Trash2 size={14} />
@@ -240,25 +240,25 @@ export default function PurchaseOrderForm({ warehouseItems, onClose }: PurchaseO
 
           {/* Total */}
           <div className="flex justify-end pt-1">
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-[var(--foreground-secondary)]">
               Total: <span className="font-medium">Rp {totalValue.toLocaleString('id-ID')}</span>
             </p>
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
 
           <div className="flex gap-3 justify-end pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              className="px-4 py-2 text-sm font-medium text-[var(--foreground-secondary)] bg-[var(--surface-hover)] rounded-lg hover:bg-[var(--border)]"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-white bg-[var(--primary)] rounded-lg hover:bg-[var(--primary-hover)] disabled:opacity-50"
             >
               {loading ? 'Saving...' : 'Create PO'}
             </button>

@@ -39,9 +39,9 @@ interface PurchaseOrderTableProps {
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
-  pending: { label: 'Pending', color: 'bg-amber-50 text-amber-700' },
-  received: { label: 'Received', color: 'bg-green-50 text-green-700' },
-  cancelled: { label: 'Cancelled', color: 'bg-red-50 text-red-700' },
+  pending: { label: 'Pending', color: 'bg-amber-50 text-[var(--warning)]' },
+  received: { label: 'Received', color: 'bg-green-50 text-[var(--accent)]' },
+  cancelled: { label: 'Cancelled', color: 'bg-[var(--danger-light)] text-[var(--danger)]' },
 }
 
 export default function PurchaseOrderTable({ purchaseOrders, warehouseItems }: PurchaseOrderTableProps) {
@@ -79,10 +79,10 @@ export default function PurchaseOrderTable({ purchaseOrders, warehouseItems }: P
   return (
     <>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-gray-500">{purchaseOrders.length} purchase orders</p>
+        <p className="text-sm text-[var(--muted)]">{purchaseOrders.length} purchase orders</p>
         <button
           onClick={() => setShowForm(true)}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          className="px-4 py-2 text-sm font-medium text-white bg-[var(--primary)] rounded-lg hover:bg-[var(--primary-hover)] flex items-center gap-2"
         >
           <Plus size={16} /> New PO
         </button>
@@ -90,7 +90,7 @@ export default function PurchaseOrderTable({ purchaseOrders, warehouseItems }: P
 
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-gray-500 text-xs border-b border-gray-100">
+          <tr className="text-[var(--muted)] text-xs border-b border-[var(--border)]">
             <th className="text-left pb-3 font-medium">PO Number</th>
             <th className="text-left pb-3 font-medium">Supplier</th>
             <th className="text-left pb-3 font-medium">Status</th>
@@ -103,7 +103,7 @@ export default function PurchaseOrderTable({ purchaseOrders, warehouseItems }: P
         <tbody className="divide-y divide-gray-50">
           {purchaseOrders.length === 0 ? (
             <tr>
-              <td colSpan={7} className="py-8 text-center text-gray-500">
+              <td colSpan={7} className="py-8 text-center text-[var(--muted)]">
                 No purchase orders yet
               </td>
             </tr>
@@ -117,18 +117,18 @@ export default function PurchaseOrderTable({ purchaseOrders, warehouseItems }: P
 
               return (
                 <tr key={po.id}>
-                  <td className="py-3 font-medium text-gray-900">{po.po_number}</td>
-                  <td className="py-3 text-gray-700">{po.supplier}</td>
+                  <td className="py-3 font-medium text-[var(--foreground)]">{po.po_number}</td>
+                  <td className="py-3 text-[var(--foreground-secondary)]">{po.supplier}</td>
                   <td className="py-3">
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${status.color}`}>
                       {status.label}
                     </span>
                   </td>
-                  <td className="py-3 text-center text-gray-700">{po.purchase_order_items.length}</td>
-                  <td className="py-3 text-right text-gray-700">
+                  <td className="py-3 text-center text-[var(--foreground-secondary)]">{po.purchase_order_items.length}</td>
+                  <td className="py-3 text-right text-[var(--foreground-secondary)]">
                     Rp {totalValue.toLocaleString('id-ID')}
                   </td>
-                  <td className="py-3 text-gray-600">
+                  <td className="py-3 text-[var(--foreground-secondary)]">
                     {new Date(po.created_at).toLocaleDateString('id-ID', {
                       day: '2-digit',
                       month: 'short',
@@ -141,7 +141,7 @@ export default function PurchaseOrderTable({ purchaseOrders, warehouseItems }: P
                         <>
                           <button
                             onClick={() => setReceivePO(po)}
-                            className="p-1.5 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg"
+                            className="p-1.5 text-[var(--muted)] hover:text-green-600 hover:bg-green-50 rounded-lg"
                             title="Receive"
                           >
                             <Truck size={14} />
@@ -149,7 +149,7 @@ export default function PurchaseOrderTable({ purchaseOrders, warehouseItems }: P
                           <button
                             onClick={() => handleCancel(po.id)}
                             disabled={loading === po.id}
-                            className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
+                            className="p-1.5 text-[var(--muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-light)] rounded-lg disabled:opacity-50"
                             title="Cancel"
                           >
                             <XCircle size={14} />
@@ -159,7 +159,7 @@ export default function PurchaseOrderTable({ purchaseOrders, warehouseItems }: P
                       <button
                         onClick={() => handleDelete(po.id)}
                         disabled={loading === po.id}
-                        className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
+                        className="p-1.5 text-[var(--muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-light)] rounded-lg disabled:opacity-50"
                         title="Delete"
                       >
                         <Trash2 size={14} />

@@ -30,7 +30,7 @@ export default function StockPageClient({ skus }: StockPageClientProps) {
             const sku = skus.find((s) => s.id === e.target.value)
             setSelectedSku(sku ?? null)
           }}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
           defaultValue=""
         >
           <option value="" disabled>
@@ -45,7 +45,7 @@ export default function StockPageClient({ skus }: StockPageClientProps) {
         {selectedSku && (
           <button
             onClick={() => setSelectedSku(selectedSku)}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 text-sm font-medium text-[var(--foreground-secondary)] bg-[var(--primary)] rounded-lg hover:bg-[var(--primary-hover)]"
           >
             Record Movement
           </button>

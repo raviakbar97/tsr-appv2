@@ -132,59 +132,59 @@ export default function WarehouseForm({ item, allItems, onClose }: WarehouseForm
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-[var(--surface)] rounded-xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">
             {isEdit ? 'Edit Warehouse Item' : 'Add Warehouse Item'}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="text-[var(--muted)] hover:text-[var(--foreground-secondary)]">
             <X size={20} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-1">Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
               placeholder="e.g. Sintren Tea"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-1">Description</label>
             <input
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
               placeholder="Optional description"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Source Type</label>
+              <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-1">Source Type</label>
               <select
                 value={sourceType}
                 onChange={(e) => setSourceType(e.target.value as 'purchased' | 'produced')}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
               >
                 <option value="purchased">Purchased</option>
                 <option value="produced">Produced</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
+              <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-1">Unit</label>
               <input
                 type="text"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                 placeholder="pcs, kg, liter"
               />
             </div>
@@ -192,13 +192,13 @@ export default function WarehouseForm({ item, allItems, onClose }: WarehouseForm
 
           {sourceType === 'purchased' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Buying Price</label>
+              <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-1">Buying Price</label>
               <input
                 type="text"
                 inputMode="decimal"
                 value={buyingPrice}
                 onChange={(e) => setBuyingPrice(sanitizePrice(e.target.value))}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                 placeholder="0"
               />
             </div>
@@ -206,13 +206,13 @@ export default function WarehouseForm({ item, allItems, onClose }: WarehouseForm
 
           {!isEdit && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Initial Stock</label>
+              <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-1">Initial Stock</label>
               <input
                 type="number"
                 value={initialStock}
                 onChange={(e) => setInitialStock(e.target.value)}
                 min="0"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                 placeholder="0"
               />
             </div>
@@ -222,20 +222,20 @@ export default function WarehouseForm({ item, allItems, onClose }: WarehouseForm
           {sourceType === 'produced' && (
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-[var(--foreground-secondary)]">
                   Bill of Materials (BOM)
                 </label>
                 <button
                   type="button"
                   onClick={addBomRow}
-                  className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                  className="text-xs text-[var(--primary)] hover:text-[var(--primary)] flex items-center gap-1"
                 >
                   <Plus size={14} /> Add Ingredient
                 </button>
               </div>
 
               {bom.length === 0 ? (
-                <p className="text-sm text-gray-500 py-2">No ingredients added</p>
+                <p className="text-sm text-[var(--muted)] py-2">No ingredients added</p>
               ) : (
                 <div className="space-y-2">
                   {bom.map((row, i) => (
@@ -243,7 +243,7 @@ export default function WarehouseForm({ item, allItems, onClose }: WarehouseForm
                       <select
                         value={row.ingredient_item_id}
                         onChange={(e) => updateBomRow(i, 'ingredient_item_id', e.target.value)}
-                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                       >
                         <option value="">Select ingredient...</option>
                         {allItems.map((ai) => (
@@ -257,13 +257,13 @@ export default function WarehouseForm({ item, allItems, onClose }: WarehouseForm
                         inputMode="decimal"
                         value={row.quantity_per_unit || ''}
                         onChange={(e) => updateBomRow(i, 'quantity_per_unit', e.target.value.replace(/[^\d.]/g, ''))}
-                        className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-20 border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                         placeholder="Qty"
                       />
                       <button
                         type="button"
                         onClick={() => removeBomRow(i)}
-                        className="p-1.5 text-gray-500 hover:text-red-600"
+                        className="p-1.5 text-[var(--muted)] hover:text-[var(--danger)]"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -277,23 +277,23 @@ export default function WarehouseForm({ item, allItems, onClose }: WarehouseForm
           {/* Unit Conversions */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-gray-700">
+              <label className="text-sm font-medium text-[var(--foreground-secondary)]">
                 Unit Conversions
               </label>
               <button
                 type="button"
                 onClick={addConvRow}
-                className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                className="text-xs text-[var(--primary)] hover:text-[var(--primary)] flex items-center gap-1"
               >
                 <Plus size={14} /> Add Unit
               </button>
             </div>
-            <p className="text-xs text-gray-500 mb-2">
+            <p className="text-xs text-[var(--muted)] mb-2">
               Define larger units. Stock is always stored in the base unit ({unit || 'pcs'}).
               Factor = how many base units per 1 larger unit.
             </p>
             {conversions.length === 0 ? (
-              <p className="text-sm text-gray-500 py-2">No conversions defined</p>
+              <p className="text-sm text-[var(--muted)] py-2">No conversions defined</p>
             ) : (
               <div className="space-y-2">
                 {conversions.map((row, i) => (
@@ -302,23 +302,23 @@ export default function WarehouseForm({ item, allItems, onClose }: WarehouseForm
                       type="text"
                       value={row.unit_name}
                       onChange={(e) => updateConvRow(i, 'unit_name', e.target.value)}
-                      className="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-24 border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                       placeholder="e.g. pack"
                     />
-                    <span className="text-xs text-gray-500">=</span>
+                    <span className="text-xs text-[var(--muted)]">=</span>
                     <input
                       type="text"
                       inputMode="decimal"
                       value={row.factor || ''}
                       onChange={(e) => updateConvRow(i, 'factor', e.target.value.replace(/[^\d.]/g, ''))}
-                      className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-20 border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                       placeholder="10"
                     />
-                    <span className="text-xs text-gray-500">{unit || 'pcs'}</span>
+                    <span className="text-xs text-[var(--muted)]">{unit || 'pcs'}</span>
                     <button
                       type="button"
                       onClick={() => removeConvRow(i)}
-                      className="p-1.5 text-gray-500 hover:text-red-600"
+                      className="p-1.5 text-[var(--muted)] hover:text-[var(--danger)]"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -328,20 +328,20 @@ export default function WarehouseForm({ item, allItems, onClose }: WarehouseForm
             )}
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
 
           <div className="flex gap-3 justify-end pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              className="px-4 py-2 text-sm font-medium text-[var(--foreground-secondary)] bg-[var(--surface-hover)] rounded-lg hover:bg-[var(--border)]"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-white bg-[var(--primary)] rounded-lg hover:bg-[var(--primary-hover)] disabled:opacity-50"
             >
               {loading ? 'Saving...' : isEdit ? 'Update' : 'Create Item'}
             </button>

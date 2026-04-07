@@ -35,7 +35,7 @@ interface OrderDetailProps {
 
 export default function OrderDetail({ order, items }: OrderDetailProps) {
   return (
-    <div className="space-y-3 text-gray-900">
+    <div className="space-y-3 text-[var(--foreground)]">
       <div className="grid grid-cols-3 gap-4 text-xs">
         {order.tracking_number && (
           <div>
@@ -72,12 +72,12 @@ export default function OrderDetail({ order, items }: OrderDetailProps) {
         </thead>
         <tbody>
           {items.map((item) => (
-            <tr key={item.id} className="border-t border-gray-200">
-              <td className="py-2 pr-2 text-gray-900 max-w-[200px] truncate">{item.product_name}</td>
+            <tr key={item.id} className="border-t border-[var(--border)]">
+              <td className="py-2 pr-2 text-[var(--foreground)] max-w-[200px] truncate">{item.product_name}</td>
               <td className="py-2 pr-2 font-mono">{item.parent_sku}</td>
               <td className="py-2 pr-2">{item.variation_name || "-"}</td>
               <td className="py-2 pr-2 text-right font-mono">{formatIDR(item.discounted_price)}</td>
-              <td className="py-2 pr-2 text-right font-mono text-red-600">
+              <td className="py-2 pr-2 text-right font-mono text-[var(--danger)]">
                 {item.total_discount > 0 ? `-${formatIDR(item.total_discount)}` : "-"}
               </td>
               <td className="py-2 text-center">{item.quantity}</td>

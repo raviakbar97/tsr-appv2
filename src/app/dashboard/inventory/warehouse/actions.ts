@@ -58,15 +58,19 @@ export async function createWarehouseItem(formData: {
     if (bomError) return { error: bomError.message }
   }
 
-  // Insert unit conversions
+  // Insert unit conversions (only factor > 1, base unit is implicit)
   if (formData.unit_conversions && formData.unit_conversions.length > 0) {
-    const convRows = formData.unit_conversions.map((c) => ({
-      warehouse_item_id: item.id,
-      unit_name: c.unit_name.trim(),
-      factor: c.factor,
-    }))
-    const { error: convError } = await supabase.from('warehouse_unit_conversions').insert(convRows)
-    if (convError) return { error: convError.message }
+    const convRows = formData.unit_conversions
+      .filter((c) => c.factor > 1)
+      .map((c) => ({
+        warehouse_item_id: item.id,
+        unit_name: c.unit_name.trim(),
+        factor: c.factor,
+      }))
+    if (convRows.length > 0) {
+      const { error: convError } = await supabase.from('warehouse_unit_conversions').insert(convRows)
+      if (convError) return { error: convError.message }
+    }
   }
 
   revalidatePath('/dashboard/inventory/warehouse')
@@ -120,13 +124,17 @@ export async function updateWarehouseItem(
   // Replace unit conversions
   await supabase.from('warehouse_unit_conversions').delete().eq('warehouse_item_id', id)
   if (formData.unit_conversions && formData.unit_conversions.length > 0) {
-    const convRows = formData.unit_conversions.map((c) => ({
-      warehouse_item_id: id,
-      unit_name: c.unit_name.trim(),
-      factor: c.factor,
-    }))
-    const { error: convError } = await supabase.from('warehouse_unit_conversions').insert(convRows)
-    if (convError) return { error: convError.message }
+    const convRows = formData.unit_conversions
+      .filter((c) => c.factor > 1)
+      .map((c) => ({
+        warehouse_item_id: id,
+        unit_name: c.unit_name.trim(),
+        factor: c.factor,
+      }))
+    if (convRows.length > 0) {
+      const { error: convError } = await supabase.from('warehouse_unit_conversions').insert(convRows)
+      if (convError) return { error: convError.message }
+    }
   }
 
   revalidatePath('/dashboard/inventory/warehouse')
@@ -299,7 +307,7 @@ export async function produceItem(formData: {
 
 export async function deductWarehouseForOrder(
   orderId: string,
-  items: { sku_id: string | null; quantity: number }[]
+  items: { sku_id: string | null; variation_id: string | null; quantity: number }[]
 ) {
   const supabase = await createClient()
 
@@ -307,6 +315,24 @@ export async function deductWarehouseForOrder(
   const skuIds = items.map((i) => i.sku_id).filter(Boolean) as string[]
   if (skuIds.length === 0) return
 
+  // Get variation-level warehouse links
+  const variationIds = items.map((i) => i.variation_id).filter(Boolean) as string[]
+  let variationWarehouseMap = new Map<string, { warehouseItemId: string; qty: number }>()
+  if (variationIds.length > 0) {
+    const { data: varLinks } = await supabase
+      .from('sku_variations')
+      .select('id, warehouse_item_id, warehouse_item_qty')
+      .in('id', variationIds)
+    if (varLinks) {
+      for (const v of varLinks) {
+        if (v.warehouse_item_id) {
+          variationWarehouseMap.set(v.id, { warehouseItemId: v.warehouse_item_id, qty: v.warehouse_item_qty ?? 1 })
+        }
+      }
+    }
+  }
+
+  // Get SKU-level warehouse links as fallback
   const { data: skuLinks } = await supabase
     .from('skus')
     .select('id, warehouse_item_id, warehouse_item_qty')
@@ -316,14 +342,36 @@ export async function deductWarehouseForOrder(
 
   const skuToWarehouse = new Map(skuLinks.map((s) => [s.id, { warehouseItemId: s.warehouse_item_id, qty: s.warehouse_item_qty ?? 1 }]))
 
-  // Aggregate quantities per warehouse item (order qty × SKU warehouse_item_qty)
+  // Aggregate quantities per warehouse item
+  // Priority: variation-level link > SKU-level link
   const deductions = new Map<string, number>()
   for (const item of items) {
     if (!item.sku_id) continue
-    const link = skuToWarehouse.get(item.sku_id)
-    if (!link?.warehouseItemId) continue
-    const totalQty = item.quantity * link.qty
-    deductions.set(link.warehouseItemId, (deductions.get(link.warehouseItemId) ?? 0) + totalQty)
+
+    let warehouseItemId: string | null = null
+    let qty = 1
+
+    // Check variation-level link first
+    if (item.variation_id) {
+      const varLink = variationWarehouseMap.get(item.variation_id)
+      if (varLink) {
+        warehouseItemId = varLink.warehouseItemId
+        qty = varLink.qty
+      }
+    }
+
+    // Fall back to SKU-level link
+    if (!warehouseItemId) {
+      const link = skuToWarehouse.get(item.sku_id)
+      if (link?.warehouseItemId) {
+        warehouseItemId = link.warehouseItemId
+        qty = link.qty
+      }
+    }
+
+    if (!warehouseItemId) continue
+    const totalQty = item.quantity * qty
+    deductions.set(warehouseItemId, (deductions.get(warehouseItemId) ?? 0) + totalQty)
   }
 
   if (deductions.size === 0) return

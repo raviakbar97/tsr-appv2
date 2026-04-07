@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { ClipboardList } from 'lucide-react'
 import WarehouseTable from '@/components/inventory/WarehouseTable'
+import PageHeader from '@/components/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,22 +60,16 @@ export default async function WarehousePage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Warehouse</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Manage raw materials, produced items, and Bill of Materials
-          </p>
-        </div>
+      <PageHeader title="Warehouse" subtitle="Manage raw materials, produced items, and Bill of Materials">
         <Link
           href="/dashboard/inventory/warehouse/po"
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--primary)] bg-[var(--primary-light)] rounded-lg hover:bg-[var(--primary-light)] transition-colors duration-[var(--transition-fast)]"
         >
           <ClipboardList size={16} /> Purchase Orders
         </Link>
-      </div>
+      </PageHeader>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-[var(--surface)] rounded-xl border border-[var(--border)] p-6 shadow-[var(--shadow-sm)]">
         <WarehouseTable items={itemsWithBom} allItems={itemsWithBom} />
       </div>
     </div>
