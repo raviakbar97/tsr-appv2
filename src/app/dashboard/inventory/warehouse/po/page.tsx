@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import PurchaseOrderTable from '@/components/inventory/PurchaseOrderTable'
+import PageHeader from '@/components/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,14 +37,9 @@ export default async function PurchaseOrdersPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Purchase Orders</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Record incoming stock from suppliers
-        </p>
-      </div>
+      <PageHeader title="Purchase Orders" subtitle="Record incoming stock from suppliers" />
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-[var(--surface)] rounded-xl border border-[var(--border)] p-6 shadow-[var(--shadow-sm)]">
         <PurchaseOrderTable
           purchaseOrders={purchaseOrders ?? []}
           warehouseItems={itemsWithConvs}

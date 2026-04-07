@@ -41,18 +41,18 @@ export default function SKUVariations({ variations, onChange }: SKUVariationsPro
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <label className="block text-sm font-medium text-gray-700">Variations</label>
+        <label className="block text-sm font-medium text-[var(--foreground-secondary)]">Variations</label>
         <button
           type="button"
           onClick={addVariation}
-          className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+          className="text-sm text-[var(--primary)] hover:text-[var(--primary)] flex items-center gap-1"
         >
           <Plus size={14} /> Add Variation
         </button>
       </div>
 
       {variations.length === 0 ? (
-        <p className="text-xs text-gray-500 py-2">No variations. Click &quot;Add Variation&quot; to add options like size, color, etc.</p>
+        <p className="text-xs text-[var(--muted)] py-2">No variations. Click &quot;Add Variation&quot; to add options like size, color, etc.</p>
       ) : (
         <div className="space-y-2">
           {variations.map((v, i) => (
@@ -62,7 +62,7 @@ export default function SKUVariations({ variations, onChange }: SKUVariationsPro
                 value={v.variation_name}
                 onChange={(e) => updateVariation(i, 'variation_name', e.target.value)}
                 placeholder="Variation name"
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                 required
               />
               <input
@@ -72,13 +72,13 @@ export default function SKUVariations({ variations, onChange }: SKUVariationsPro
                 onChange={(e) => updateVariation(i, 'base_price_override', sanitizePrice(e.target.value))}
                 onBlur={(e) => updateVariation(i, 'base_price_override', sanitizePrice(e.target.value))}
                 placeholder="Price"
-                className="w-40 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-40 border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                 required
               />
               <button
                 type="button"
                 onClick={() => removeVariation(i)}
-                className="p-1.5 text-gray-400 hover:text-red-600"
+                className="p-1.5 text-[var(--muted)] hover:text-[var(--danger)]"
               >
                 <Trash2 size={16} />
               </button>

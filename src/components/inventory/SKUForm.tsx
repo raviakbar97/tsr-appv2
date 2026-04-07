@@ -163,24 +163,24 @@ export default function SKUForm({ sku, fees, warehouseItems = [], onClose }: SKU
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-[var(--surface)] rounded-xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">
             {isEdit ? 'Edit SKU' : 'Add SKU'}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="text-[var(--muted)] hover:text-[var(--foreground-secondary)]">
             <X size={20} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">SKU Name</label>
+            <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-1">SKU Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => handleNameChange(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
               placeholder="Product name"
               required
             />
@@ -188,7 +188,7 @@ export default function SKUForm({ sku, fees, warehouseItems = [], onClose }: SKU
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">SKU Code</label>
+              <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-1">SKU Code</label>
               <input
                 type="text"
                 value={skuCode}
@@ -196,16 +196,16 @@ export default function SKUForm({ sku, fees, warehouseItems = [], onClose }: SKU
                   codeManuallyEdited.current = true
                   setSkuCode(e.target.value)
                 }}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                 placeholder="e.g. SKU-001"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-1">
                 Base Price
                 {variations.length > 0 && (
-                  <span className="text-xs font-normal text-gray-400 ml-1">(set per variation)</span>
+                  <span className="text-xs font-normal text-[var(--muted)] ml-1">(set per variation)</span>
                 )}
               </label>
               <input
@@ -215,10 +215,10 @@ export default function SKUForm({ sku, fees, warehouseItems = [], onClose }: SKU
                 onChange={(e) => setBasePrice(sanitizePrice(e.target.value))}
                 onBlur={(e) => setBasePrice(sanitizePrice(e.target.value))}
                 disabled={variations.length > 0}
-                className={`w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] ${
                   variations.length > 0
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'text-gray-900'
+                    ? 'bg-[var(--surface-hover)] text-[var(--muted)] cursor-not-allowed'
+                    : 'text-[var(--foreground)]'
                 }`}
                 required={variations.length === 0}
               />
@@ -229,14 +229,14 @@ export default function SKUForm({ sku, fees, warehouseItems = [], onClose }: SKU
 
           {warehouseItems.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-1">
                 Linked Warehouse Item
               </label>
               <div className="flex gap-2">
                 <select
                   value={warehouseItemId}
                   onChange={(e) => setWarehouseItemId(e.target.value)}
-                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                 >
                   <option value="">None</option>
                   {warehouseItems.map((wi) => (
@@ -251,14 +251,14 @@ export default function SKUForm({ sku, fees, warehouseItems = [], onClose }: SKU
                     inputMode="numeric"
                     value={warehouseItemQty}
                     onChange={(e) => setWarehouseItemQty(e.target.value.replace(/[^\d]/g, ''))}
-                    className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-20 border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                     placeholder="Qty"
                     title="Qty of warehouse item consumed per 1 SKU sold"
                   />
                 )}
               </div>
               {warehouseItemId && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-[var(--muted)] mt-1">
                   Qty: how many warehouse units are consumed per 1 SKU sold
                 </p>
               )}
@@ -271,20 +271,20 @@ export default function SKUForm({ sku, fees, warehouseItems = [], onClose }: SKU
             onChange={setFeeAssignments}
           />
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
 
           <div className="flex gap-3 justify-end pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              className="px-4 py-2 text-sm font-medium text-[var(--foreground-secondary)] bg-[var(--surface-hover)] rounded-lg hover:bg-[var(--border)]"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-white bg-[var(--primary)] rounded-lg hover:bg-[var(--primary-hover)] disabled:opacity-50"
             >
               {loading ? 'Saving...' : isEdit ? 'Update' : 'Create SKU'}
             </button>

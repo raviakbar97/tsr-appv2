@@ -79,15 +79,15 @@ export default function SKUFeeAssignment({ fees, assignments, onChange }: SKUFee
   if (activeFees.length === 0) {
     return (
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Fee Assignment</label>
-        <p className="text-xs text-gray-500">No active fees available. Create fees in the Fee Registry first.</p>
+        <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-2">Fee Assignment</label>
+        <p className="text-xs text-[var(--muted)]">No active fees available. Create fees in the Fee Registry first.</p>
       </div>
     )
   }
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">Fee Assignment</label>
+      <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-2">Fee Assignment</label>
       <div className="space-y-3">
         {activeFees.map((fee) => {
           const assignment = assignments.find((a) => a.fee_id === fee.id)
@@ -96,19 +96,19 @@ export default function SKUFeeAssignment({ fees, assignments, onChange }: SKUFee
           const tiers = fee.fee_tiers ?? []
 
           return (
-            <div key={fee.id} className="border border-gray-100 rounded-lg p-3">
+            <div key={fee.id} className="border border-[var(--border)] rounded-lg p-3">
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={isChecked}
                   onChange={() => toggleFee(fee.id)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-[var(--border-strong)] text-[var(--primary)] focus:ring-[var(--primary)]"
                 />
-                <span className="text-sm text-gray-900 font-medium">
+                <span className="text-sm text-[var(--foreground)] font-medium">
                   {fee.name}
                 </span>
                 <span className={`text-xs px-1.5 py-0.5 rounded ${
-                  fee.fee_type === 'percentage' ? 'bg-purple-50 text-purple-600' : 'bg-amber-50 text-amber-600'
+                  fee.fee_type === 'percentage' ? 'bg-purple-50 text-purple-600' : 'bg-amber-50 text-[var(--warning)]'
                 }`}>
                   {fee.fee_type === 'percentage' ? '%' : 'IDR'}
                 </span>
@@ -117,7 +117,7 @@ export default function SKUFeeAssignment({ fees, assignments, onChange }: SKUFee
               {isChecked && hasTiers && (
                 <div className="mt-2 ml-6 space-y-2">
                   <div className="flex items-center gap-2">
-                    <label className="text-xs text-gray-500 w-20">Tier</label>
+                    <label className="text-xs text-[var(--muted)] w-20">Tier</label>
                     <select
                       value={assignment?.fee_tier_id ?? ''}
                       onChange={(e) => {
@@ -127,7 +127,7 @@ export default function SKUFeeAssignment({ fees, assignments, onChange }: SKUFee
                           clearTier(fee.id)
                         }
                       }}
-                      className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 border border-[var(--border-strong)] rounded-lg px-3 py-1.5 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                     >
                       <option value="">Select a tier...</option>
                       {tiers.map((tier) => (
@@ -142,7 +142,7 @@ export default function SKUFeeAssignment({ fees, assignments, onChange }: SKUFee
                     </select>
                   </div>
                   {assignment?.fee_tier_id && (
-                    <p className="text-xs text-gray-500 ml-20">
+                    <p className="text-xs text-[var(--muted)] ml-20">
                       {fee.fee_type === 'percentage'
                         ? `${assignment.value}%${assignment.has_max ? ` (max Rp ${Number(assignment.max_value).toLocaleString('id-ID')})` : ''}`
                         : `Rp ${Number(assignment.value).toLocaleString('id-ID')}`}
@@ -154,7 +154,7 @@ export default function SKUFeeAssignment({ fees, assignments, onChange }: SKUFee
               {isChecked && !hasTiers && (
                 <div className="mt-2 ml-6 space-y-2">
                   <div className="flex items-center gap-2">
-                    <label className="text-xs text-gray-500 w-20">
+                    <label className="text-xs text-[var(--muted)] w-20">
                       {fee.fee_type === 'percentage' ? 'Percentage' : 'Amount'}
                     </label>
                     <input
@@ -164,17 +164,17 @@ export default function SKUFeeAssignment({ fees, assignments, onChange }: SKUFee
                       value={assignment?.value ?? ''}
                       onChange={(e) => updateField(fee.id, 'value', e.target.value)}
                       placeholder={fee.fee_type === 'percentage' ? 'e.g. 4' : 'e.g. 5000'}
-                      className="w-36 border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-36 border border-[var(--border-strong)] rounded-lg px-3 py-1.5 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                       required
                     />
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-[var(--muted)]">
                       {fee.fee_type === 'percentage' ? '%' : 'IDR'}
                     </span>
                   </div>
 
                   {fee.fee_type === 'percentage' && (
                     <div className="flex items-center gap-2">
-                      <label className="text-xs text-gray-500 w-20">Max fee</label>
+                      <label className="text-xs text-[var(--muted)] w-20">Max fee</label>
                       <label className="flex items-center gap-1.5 cursor-pointer">
                         <input
                           type="checkbox"
@@ -183,9 +183,9 @@ export default function SKUFeeAssignment({ fees, assignments, onChange }: SKUFee
                             updateField(fee.id, 'has_max', e.target.checked)
                             if (!e.target.checked) updateField(fee.id, 'max_value', '')
                           }}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-[var(--border-strong)] text-[var(--primary)] focus:ring-[var(--primary)]"
                         />
-                        <span className="text-xs text-gray-500">Cap</span>
+                        <span className="text-xs text-[var(--muted)]">Cap</span>
                       </label>
                       {assignment?.has_max && (
                         <>
@@ -196,10 +196,10 @@ export default function SKUFeeAssignment({ fees, assignments, onChange }: SKUFee
                             value={assignment?.max_value ?? ''}
                             onChange={(e) => updateField(fee.id, 'max_value', e.target.value)}
                             placeholder="e.g. 40000"
-                            className="w-36 border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-36 border border-[var(--border-strong)] rounded-lg px-3 py-1.5 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                             required
                           />
-                          <span className="text-xs text-gray-500">IDR</span>
+                          <span className="text-xs text-[var(--muted)]">IDR</span>
                         </>
                       )}
                     </div>

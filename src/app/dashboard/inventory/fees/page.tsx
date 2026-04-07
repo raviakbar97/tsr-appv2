@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import FeeTable from '@/components/inventory/FeeTable'
+import PageHeader from '@/components/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,14 +13,9 @@ export default async function FeesPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Fee Registry</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Manage fee types that can be assigned to SKUs. Add tiers to pre-define value options.
-        </p>
-      </div>
+      <PageHeader title="Fee Registry" subtitle="Manage fee types that can be assigned to SKUs. Add tiers to pre-define value options." />
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-[var(--surface)] rounded-xl border border-[var(--border)] p-6 shadow-[var(--shadow-sm)]">
         <FeeTable fees={fees ?? []} />
       </div>
     </div>

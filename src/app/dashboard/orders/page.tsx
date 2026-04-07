@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import OrderTable from "@/components/orders/OrderTable";
+import PageHeader from "@/components/PageHeader";
 import { enrichOrderItems } from "@/lib/profit";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +15,12 @@ interface OrderItemRow {
   discounted_price: number;
   quantity: number;
   buyer_paid: number;
+}
+
+interface SKUWithVariations {
+  id: string;
+  name: string;
+  variations: { id: string; variation_name: string }[];
 }
 
 interface OrderRow {
@@ -37,18 +44,27 @@ export default async function OrdersPage() {
     .select("*, order_items(*)")
     .order("created_at", { ascending: false });
 
+  // Fetch SKUs with variations for manual order form
+  const [skusRes, variationsRes] = await Promise.all([
+    supabase.from("skus").select("id, name").order("name"),
+    supabase.from("sku_variations").select("id, sku_id, variation_name"),
+  ]);
+
+  const skuVariations: SKUWithVariations[] = (skusRes.data ?? []).map((sku) => ({
+    id: sku.id,
+    name: sku.name,
+    variations: (variationsRes.data ?? [])
+      .filter((v) => v.sku_id === sku.id)
+      .map((v) => ({ id: v.id, variation_name: v.variation_name })),
+  }));
+
   const typedOrders = (orders ?? []) as unknown as OrderRow[];
 
   if (!orders || orders.length === 0) {
     return (
       <div>
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Manage and recap your Shopee orders
-          </p>
-        </div>
-        <OrderTable orders={[]} />
+        <PageHeader title="Orders" subtitle="Manage and recap your Shopee orders" />
+        <OrderTable orders={[]} skus={skuVariations} />
       </div>
     );
   }
@@ -66,7 +82,7 @@ export default async function OrdersPage() {
   )];
 
   // Fetch SKU base prices, variation overrides, and fees
-  const [skusRes, variationsRes, feesRes] = await Promise.all([
+  const [pricesRes, varPricesRes, feesRes] = await Promise.all([
     skuIds.length > 0
       ? supabase.from("skus").select("id, base_price").in("id", skuIds)
       : Promise.resolve({ data: [] }),
@@ -79,8 +95,8 @@ export default async function OrdersPage() {
   ]);
 
   // Build lookup maps
-  const skuMap = new Map((skusRes.data ?? []).map(s => [s.id, Number(s.base_price)]));
-  const variationMap = new Map((variationsRes.data ?? []).map(v => [v.id, v.base_price_override]));
+  const skuMap = new Map((pricesRes.data ?? []).map(s => [s.id, Number(s.base_price)]));
+  const variationMap = new Map((varPricesRes.data ?? []).map(v => [v.id, v.base_price_override]));
 
   const feesBySku = new Map<string, { fee_type: string; value: number; max_value: number | null }[]>();
   for (const sf of (feesRes.data ?? [])) {
@@ -146,13 +162,8 @@ export default async function OrdersPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
-        <p className="text-sm text-gray-600 mt-1">
-          Manage and recap your Shopee orders
-        </p>
-      </div>
-      <OrderTable orders={enrichedOrders} />
+      <PageHeader title="Orders" subtitle="Manage and recap your Shopee orders" />
+      <OrderTable orders={enrichedOrders} skus={skuVariations} />
     </div>
   );
 }

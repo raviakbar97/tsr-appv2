@@ -32,24 +32,24 @@ export default function PurchaseOrderReceive({ po, onConfirm, onClose, loading }
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-xl">
+      <div className="bg-[var(--surface)] rounded-xl p-6 w-full max-w-lg shadow-xl">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Receive PO — {po.po_number}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">Receive PO — {po.po_number}</h2>
+          <button onClick={onClose} className="text-[var(--muted)] hover:text-[var(--foreground-secondary)]">
             <X size={20} />
           </button>
         </div>
 
         <div className="mb-4">
-          <p className="text-sm text-gray-700">
-            Supplier: <span className="font-medium text-gray-900">{po.supplier}</span>
+          <p className="text-sm text-[var(--foreground-secondary)]">
+            Supplier: <span className="font-medium text-[var(--foreground)]">{po.supplier}</span>
           </p>
         </div>
 
         <div className="mb-4">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-gray-500 text-xs">
+              <tr className="text-[var(--muted)] text-xs">
                 <th className="text-left pb-2 font-medium">Item</th>
                 <th className="text-right pb-2 font-medium">Qty</th>
                 <th className="text-right pb-2 font-medium">Unit Price</th>
@@ -59,14 +59,14 @@ export default function PurchaseOrderReceive({ po, onConfirm, onClose, loading }
             <tbody className="divide-y divide-gray-50">
               {po.purchase_order_items.map((item) => (
                 <tr key={item.id}>
-                  <td className="py-2 text-gray-900">
+                  <td className="py-2 text-[var(--foreground)]">
                     {item.warehouse_items?.name ?? 'Unknown'}
                   </td>
-                  <td className="py-2 text-right text-gray-700">{item.quantity}</td>
-                  <td className="py-2 text-right text-gray-700">
+                  <td className="py-2 text-right text-[var(--foreground-secondary)]">{item.quantity}</td>
+                  <td className="py-2 text-right text-[var(--foreground-secondary)]">
                     Rp {Number(item.unit_price).toLocaleString('id-ID')}
                   </td>
-                  <td className="py-2 text-right font-medium text-gray-900">
+                  <td className="py-2 text-right font-medium text-[var(--foreground)]">
                     Rp {(item.quantity * Number(item.unit_price)).toLocaleString('id-ID')}
                   </td>
                 </tr>
@@ -75,19 +75,19 @@ export default function PurchaseOrderReceive({ po, onConfirm, onClose, loading }
           </table>
         </div>
 
-        <div className="flex justify-between items-center py-3 border-t border-gray-100 mb-4">
-          <span className="text-sm font-medium text-gray-700">Total</span>
-          <span className="text-sm font-bold text-gray-900">Rp {totalValue.toLocaleString('id-ID')}</span>
+        <div className="flex justify-between items-center py-3 border-t border-[var(--border)] mb-4">
+          <span className="text-sm font-medium text-[var(--foreground-secondary)]">Total</span>
+          <span className="text-sm font-bold text-[var(--foreground)]">Rp {totalValue.toLocaleString('id-ID')}</span>
         </div>
 
-        <p className="text-sm text-gray-500 mb-4">
+        <p className="text-sm text-[var(--muted)] mb-4">
           Confirming will increase stock for each item and record warehouse transactions.
         </p>
 
         <div className="flex gap-3 justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+            className="px-4 py-2 text-sm font-medium text-[var(--foreground-secondary)] bg-[var(--surface-hover)] rounded-lg hover:bg-[var(--border)]"
           >
             Cancel
           </button>

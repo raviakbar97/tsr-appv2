@@ -3,6 +3,7 @@
 import { useState } from "react";
 import UploadZone from "@/components/import/UploadZone";
 import ImportPreview from "@/components/import/ImportPreview";
+import PageHeader from "@/components/PageHeader";
 
 interface PreviewData {
   orderCount: number;
@@ -21,12 +22,7 @@ export default function ImportPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Import Orders</h1>
-        <p className="text-sm text-gray-600 mt-1">
-          Upload your Shopee order export (.xlsx)
-        </p>
-      </div>
+      <PageHeader title="Import Orders" subtitle="Upload your Shopee order export (.xlsx)" />
 
       {preview ? (
         <ImportPreview

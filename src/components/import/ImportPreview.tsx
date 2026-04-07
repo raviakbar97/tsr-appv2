@@ -66,22 +66,22 @@ export default function ImportPreview({ orderCount, itemCount, skippedCount, ord
     <div>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-lg font-medium text-gray-900">Preview</h3>
-          <p className="text-sm text-gray-600">
+          <h3 className="text-lg font-medium text-[var(--foreground)]">Preview</h3>
+          <p className="text-sm text-[var(--foreground-secondary)]">
             {orderCount} orders, {itemCount} items found
           </p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={onDone}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+            className="px-4 py-2 border border-[var(--border-strong)] rounded-lg text-sm text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)]"
           >
             Cancel
           </button>
           <button
             onClick={handleConfirm}
             disabled={importing || orderCount === 0}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+            className="px-4 py-2 bg-[var(--primary)] text-white rounded-lg text-sm hover:bg-[var(--primary-hover)] disabled:opacity-50 flex items-center gap-2"
           >
             {importing && <Loader2 size={14} className="animate-spin" />}
             {importing ? "Importing..." : "Confirm Import"}
@@ -103,9 +103,9 @@ export default function ImportPreview({ orderCount, itemCount, skippedCount, ord
         </div>
       )}
 
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <table className="w-full text-sm text-gray-900">
-          <thead className="bg-gray-50">
+      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden">
+        <table className="w-full text-sm text-[var(--foreground)]">
+          <thead className="bg-[var(--surface-hover)]">
             <tr>
               <th className="text-left px-4 py-3 font-medium">Order #</th>
               <th className="text-left px-4 py-3 font-medium">Status</th>

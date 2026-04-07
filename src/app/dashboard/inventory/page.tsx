@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import SKUTable from '@/components/inventory/SKUTable'
+import PageHeader from '@/components/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,14 +18,9 @@ export default async function InventoryPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Inventory</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Manage your SKUs, variations, and fee assignments
-        </p>
-      </div>
+      <PageHeader title="Inventory" subtitle="Manage your SKUs, variations, and fee assignments" />
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-[var(--surface)] rounded-xl border border-[var(--border)] p-6 shadow-[var(--shadow-sm)]">
         <SKUTable skus={skus ?? []} fees={fees ?? []} warehouseItems={warehouseItems ?? []} />
       </div>
     </div>

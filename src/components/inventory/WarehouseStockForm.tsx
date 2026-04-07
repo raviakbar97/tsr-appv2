@@ -71,12 +71,12 @@ export default function WarehouseStockForm({ item, unitConversions, onClose }: W
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
+      <div className="bg-[var(--surface)] rounded-xl p-6 w-full max-w-md shadow-xl">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">
             {mode === 'produce' ? 'Produce' : 'Adjust Stock'} — {item.name}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="text-[var(--muted)] hover:text-[var(--foreground-secondary)]">
             <X size={20} />
           </button>
         </div>
@@ -89,7 +89,7 @@ export default function WarehouseStockForm({ item, unitConversions, onClose }: W
               className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg ${
                 mode === 'produce'
                   ? 'bg-purple-100 text-purple-700 border border-purple-200'
-                  : 'bg-gray-50 text-gray-600 border border-gray-200'
+                  : 'bg-[var(--surface-hover)] text-[var(--foreground-secondary)] border border-[var(--border)]'
               }`}
             >
               Produce from BOM
@@ -99,8 +99,8 @@ export default function WarehouseStockForm({ item, unitConversions, onClose }: W
               onClick={() => setMode('adjust')}
               className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg ${
                 mode === 'adjust'
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                  : 'bg-gray-50 text-gray-600 border border-gray-200'
+                  ? 'bg-[var(--primary-light)] text-[var(--primary)] border border-[var(--primary)]'
+                  : 'bg-[var(--surface-hover)] text-[var(--foreground-secondary)] border border-[var(--border)]'
               }`}
             >
               Manual Adjust
@@ -109,8 +109,8 @@ export default function WarehouseStockForm({ item, unitConversions, onClose }: W
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <p className="text-sm text-gray-500">
-            Current stock: <span className="font-medium text-gray-900">{item.stock} {item.unit}</span>
+          <p className="text-sm text-[var(--muted)]">
+            Current stock: <span className="font-medium text-[var(--foreground)]">{item.stock} {item.unit}</span>
           </p>
 
           {mode === 'adjust' && (
@@ -120,8 +120,8 @@ export default function WarehouseStockForm({ item, unitConversions, onClose }: W
                 onClick={() => setType('in')}
                 className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg flex items-center justify-center gap-1 ${
                   type === 'in'
-                    ? 'bg-green-100 text-green-700 border border-green-200'
-                    : 'bg-gray-50 text-gray-600 border border-gray-200'
+                    ? 'bg-[var(--accent-light)] text-[var(--accent)] border border-green-200'
+                    : 'bg-[var(--surface-hover)] text-[var(--foreground-secondary)] border border-[var(--border)]'
                 }`}
               >
                 <TrendingUp size={14} /> Stock In
@@ -131,8 +131,8 @@ export default function WarehouseStockForm({ item, unitConversions, onClose }: W
                 onClick={() => setType('out')}
                 className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg flex items-center justify-center gap-1 ${
                   type === 'out'
-                    ? 'bg-red-100 text-red-700 border border-red-200'
-                    : 'bg-gray-50 text-gray-600 border border-gray-200'
+                    ? 'bg-[var(--danger-light)] text-[var(--danger)] border border-[var(--danger)]'
+                    : 'bg-[var(--surface-hover)] text-[var(--foreground-secondary)] border border-[var(--border)]'
                 }`}
               >
                 <TrendingDown size={14} /> Stock Out
@@ -141,14 +141,14 @@ export default function WarehouseStockForm({ item, unitConversions, onClose }: W
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+            <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-1">Quantity</label>
             <div className="flex gap-2">
               <input
                 type="number"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
                 min="1"
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                 placeholder="Enter quantity"
                 required
               />
@@ -156,7 +156,7 @@ export default function WarehouseStockForm({ item, unitConversions, onClose }: W
                 <select
                   value={selectedUnit}
                   onChange={(e) => setSelectedUnit(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                 >
                   {allUnits.map((u) => (
                     <option key={u.name} value={u.name}>
@@ -167,30 +167,30 @@ export default function WarehouseStockForm({ item, unitConversions, onClose }: W
               )}
             </div>
             {currentFactor > 1 && parseInt(quantity) > 0 && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-[var(--muted)] mt-1">
                 = {baseQty} {item.unit}
               </p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Note</label>
+            <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-1">Note</label>
             <input
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
               placeholder="Optional note"
             />
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
 
           <div className="flex gap-3 justify-end pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              className="px-4 py-2 text-sm font-medium text-[var(--foreground-secondary)] bg-[var(--surface-hover)] rounded-lg hover:bg-[var(--border)]"
             >
               Cancel
             </button>

@@ -64,14 +64,14 @@ export default function WarehouseTable({ items, allItems }: WarehouseTableProps)
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search warehouse items..."
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] bg-[var(--surface)] w-64 focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
         />
         <button
           onClick={() => {
             setEditItem(null)
             setShowForm(true)
           }}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          className="px-4 py-2 text-sm font-medium text-white bg-[var(--primary)] rounded-lg hover:bg-[var(--primary-hover)] flex items-center gap-2"
         >
           <Plus size={16} /> Add Item
         </button>
@@ -79,7 +79,7 @@ export default function WarehouseTable({ items, allItems }: WarehouseTableProps)
 
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-gray-500 text-xs border-b border-gray-100">
+          <tr className="text-[var(--muted)] text-xs border-b border-[var(--border)]">
             <th className="text-left pb-3 font-medium">Name</th>
             <th className="text-left pb-3 font-medium">Type</th>
             <th className="text-right pb-3 font-medium">Cost</th>
@@ -91,7 +91,7 @@ export default function WarehouseTable({ items, allItems }: WarehouseTableProps)
         <tbody className="divide-y divide-gray-50">
           {filtered.length === 0 ? (
             <tr>
-              <td colSpan={6} className="py-8 text-center text-gray-500">
+              <td colSpan={6} className="py-8 text-center text-[var(--muted)]">
                 No warehouse items found
               </td>
             </tr>
@@ -101,15 +101,15 @@ export default function WarehouseTable({ items, allItems }: WarehouseTableProps)
                 <td className="py-3">
                   <button
                     onClick={() => setHistoryItem(item)}
-                    className="text-gray-900 font-medium hover:text-blue-600 hover:underline text-left"
+                    className="text-[var(--foreground)] font-medium hover:text-[var(--primary)] hover:underline text-left"
                   >
                     {item.name}
                   </button>
                   {item.description && (
-                    <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
+                    <p className="text-xs text-[var(--muted)] mt-0.5">{item.description}</p>
                   )}
                   {item.source_type === 'produced' && item.warehouse_bom && item.warehouse_bom.length > 0 && (
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs text-[var(--muted)] mt-0.5">
                       BOM: {item.warehouse_bom.map(b => `${b.ingredient?.name ?? '?'} x${b.quantity_per_unit}`).join(', ')}
                     </p>
                   )}
@@ -117,8 +117,8 @@ export default function WarehouseTable({ items, allItems }: WarehouseTableProps)
                 <td className="py-3">
                   <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                     item.source_type === 'purchased'
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'bg-purple-50 text-purple-700'
+                      ? 'bg-[var(--primary-light)] text-[var(--primary)]'
+                      : 'bg-[var(--primary-light)] text-[var(--primary)]'
                   }`}>
                     {item.source_type === 'purchased' ? (
                       <><ShoppingCart size={12} /> Purchased</>
@@ -127,7 +127,7 @@ export default function WarehouseTable({ items, allItems }: WarehouseTableProps)
                     )}
                   </span>
                 </td>
-                <td className="py-3 text-right text-gray-700">
+                <td className="py-3 text-right text-[var(--foreground-secondary)]">
                   {item.source_type === 'purchased' ? (
                     `Rp ${Number(item.buying_price).toLocaleString('id-ID')}`
                   ) : item.warehouse_bom && item.warehouse_bom.length > 0 ? (
@@ -135,17 +135,17 @@ export default function WarehouseTable({ items, allItems }: WarehouseTableProps)
                       Rp {Number(item.warehouse_bom.reduce((sum, b) => sum + (b.ingredient ? b.ingredient.buying_price * b.quantity_per_unit : 0), 0)).toLocaleString('id-ID')}
                     </span>
                   ) : (
-                    <span className="text-gray-500">-</span>
+                    <span className="text-[var(--muted)]">-</span>
                   )}
                 </td>
                 <td className="py-3 text-center">
                   <span className={`font-medium ${
-                    item.stock === 0 ? 'text-red-600' : item.stock <= 10 ? 'text-amber-600' : 'text-gray-900'
+                    item.stock === 0 ? 'text-[var(--danger)]' : item.stock <= 10 ? 'text-[var(--warning)]' : 'text-[var(--foreground)]'
                   }`}>
                     {item.stock} {item.unit}
                   </span>
                   {item.unit_conversions && item.unit_conversions.length > 0 && item.stock > 0 && (
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs text-[var(--muted)] mt-0.5">
                       ({item.unit_conversions.map((c) => {
                         const val = Math.floor(item.stock / c.factor)
                         const remainder = item.stock % c.factor
@@ -157,9 +157,9 @@ export default function WarehouseTable({ items, allItems }: WarehouseTableProps)
                 <td className="py-3 text-center">
                   <button onClick={() => handleToggle(item)} title={item.is_active ? 'Deactivate' : 'Activate'}>
                     {item.is_active ? (
-                      <ToggleRight size={20} className="text-green-600 inline" />
+                      <ToggleRight size={20} className="text-[var(--accent)] inline" />
                     ) : (
-                      <ToggleLeft size={20} className="text-gray-400 inline" />
+                      <ToggleLeft size={20} className="text-[var(--muted)] inline" />
                     )}
                   </button>
                 </td>
@@ -167,7 +167,7 @@ export default function WarehouseTable({ items, allItems }: WarehouseTableProps)
                   <div className="flex items-center justify-end gap-1">
                     <button
                       onClick={() => setStockItem(item)}
-                      className="p-1.5 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg"
+                      className="p-1.5 text-[var(--muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-light)] rounded-lg"
                       title="Adjust Stock"
                     >
                       <Plus size={14} />
@@ -177,7 +177,7 @@ export default function WarehouseTable({ items, allItems }: WarehouseTableProps)
                         setEditItem(item)
                         setShowForm(true)
                       }}
-                      className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                      className="p-1.5 text-[var(--muted)] hover:text-[var(--primary)] hover:bg-[var(--primary-light)] rounded-lg"
                       title="Edit"
                     >
                       <Pencil size={14} />
@@ -185,7 +185,7 @@ export default function WarehouseTable({ items, allItems }: WarehouseTableProps)
                     <button
                       onClick={() => handleDelete(item.id)}
                       disabled={deleting === item.id}
-                      className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
+                      className="p-1.5 text-[var(--muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-light)] rounded-lg disabled:opacity-50"
                       title="Delete"
                     >
                       <Trash2 size={14} />

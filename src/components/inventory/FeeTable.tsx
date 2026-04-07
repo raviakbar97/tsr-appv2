@@ -78,12 +78,12 @@ export default function FeeTable({ fees }: FeeTableProps) {
   return (
     <>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-gray-500">{fees.length} fee(s) registered</p>
+        <p className="text-sm text-[var(--muted)]">{fees.length} fee(s) registered</p>
         {selectMode ? (
           <div className="flex items-center gap-2">
             <button
               onClick={exitSelectMode}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="px-4 py-2 text-sm font-medium text-[var(--foreground-secondary)] bg-[var(--surface)] border border-[var(--border-strong)] rounded-lg hover:bg-[var(--surface-hover)]"
             >
               Cancel
             </button>
@@ -99,14 +99,14 @@ export default function FeeTable({ fees }: FeeTableProps) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSelectMode(true)}
-              className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-red-600"
+              className="p-2 rounded-lg text-[var(--muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--danger)]"
               title="Mass delete"
             >
               <Trash2 size={18} />
             </button>
             <button
               onClick={() => setShowAdd(true)}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              className="px-4 py-2 text-sm font-medium text-white bg-[var(--primary)] rounded-lg hover:bg-[var(--primary-hover)]"
             >
               Add Fee
             </button>
@@ -114,9 +114,9 @@ export default function FeeTable({ fees }: FeeTableProps) {
         )}
       </div>
 
-      <div className="border border-gray-200 rounded-xl overflow-hidden">
+      <div className="border border-[var(--border)] rounded-xl overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50">
+          <thead className="bg-[var(--surface-hover)]">
             <tr>
               {selectMode && (
                 <th className="px-4 py-3 w-10">
@@ -124,62 +124,62 @@ export default function FeeTable({ fees }: FeeTableProps) {
                     type="checkbox"
                     checked={fees.length > 0 && selectedIds.size === fees.length}
                     onChange={toggleSelectAll}
-                    className="rounded border-gray-300"
+                    className="rounded border-[var(--border-strong)]"
                   />
                 </th>
               )}
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Type</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Tiers</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-              {!selectMode && <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>}
+              <th className="text-left px-4 py-3 font-medium text-[var(--foreground-secondary)]">Name</th>
+              <th className="text-left px-4 py-3 font-medium text-[var(--foreground-secondary)]">Type</th>
+              <th className="text-left px-4 py-3 font-medium text-[var(--foreground-secondary)]">Tiers</th>
+              <th className="text-left px-4 py-3 font-medium text-[var(--foreground-secondary)]">Status</th>
+              {!selectMode && <th className="text-right px-4 py-3 font-medium text-[var(--foreground-secondary)]">Actions</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {fees.length === 0 ? (
               <tr>
-                <td colSpan={selectMode ? 5 : 6} className="text-center py-8 text-gray-500">
+                <td colSpan={selectMode ? 5 : 6} className="text-center py-8 text-[var(--muted)]">
                   No fees yet. Add your first fee to get started.
                 </td>
               </tr>
             ) : (
               fees.map((fee) => (
-                <tr key={fee.id} className={`hover:bg-gray-50 ${selectedIds.has(fee.id) ? 'bg-red-50' : ''}`}>
+                <tr key={fee.id} className={`hover:bg-[var(--surface-hover)] ${selectedIds.has(fee.id) ? 'bg-[var(--danger-light)]' : ''}`}>
                   {selectMode && (
                     <td className="px-4 py-3">
                       <input
                         type="checkbox"
                         checked={selectedIds.has(fee.id)}
                         onChange={() => toggleSelect(fee.id)}
-                        className="rounded border-gray-300"
+                        className="rounded border-[var(--border-strong)]"
                       />
                     </td>
                   )}
-                  <td className="px-4 py-3 font-medium text-gray-900">{fee.name}</td>
+                  <td className="px-4 py-3 font-medium text-[var(--foreground)]">{fee.name}</td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
                       fee.fee_type === 'percentage'
                         ? 'bg-purple-50 text-purple-700'
-                        : 'bg-amber-50 text-amber-700'
+                        : 'bg-amber-50 text-[var(--warning)]'
                     }`}>
                       {fee.fee_type === 'percentage' ? '% Percentage' : 'IDR Fixed'}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     {fee.fee_tiers?.length > 0 ? (
-                      <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                      <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--primary-light)] text-[var(--primary)]">
                         {fee.fee_tiers.length} tier{fee.fee_tiers.length !== 1 ? 's' : ''}
                       </span>
                     ) : (
-                      <span className="text-xs text-gray-400">Manual input</span>
+                      <span className="text-xs text-[var(--muted)]">Manual input</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
                     <span
                       className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
                         fee.is_active
-                          ? 'bg-green-50 text-green-700'
-                          : 'bg-gray-100 text-gray-500'
+                          ? 'bg-green-50 text-[var(--accent)]'
+                          : 'bg-[var(--surface-hover)] text-[var(--muted)]'
                       }`}
                     >
                       {fee.is_active ? 'Active' : 'Inactive'}
@@ -190,21 +190,21 @@ export default function FeeTable({ fees }: FeeTableProps) {
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => handleToggle(fee.id, fee.is_active)}
-                          className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-600"
+                          className="p-1.5 rounded-lg hover:bg-[var(--surface-hover)] text-[var(--muted)] hover:text-[var(--foreground-secondary)]"
                           title={fee.is_active ? 'Deactivate' : 'Activate'}
                         >
                           {fee.is_active ? <PowerOff size={16} /> : <Power size={16} />}
                         </button>
                         <button
                           onClick={() => setEditingFee(fee)}
-                          className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-blue-600"
+                          className="p-1.5 rounded-lg hover:bg-[var(--surface-hover)] text-[var(--muted)] hover:text-[var(--primary)]"
                           title="Edit"
                         >
                           <Pencil size={16} />
                         </button>
                         <button
                           onClick={() => handleDelete(fee.id)}
-                          className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-red-600"
+                          className="p-1.5 rounded-lg hover:bg-[var(--surface-hover)] text-[var(--muted)] hover:text-[var(--danger)]"
                           title="Delete"
                         >
                           <Trash2 size={16} />

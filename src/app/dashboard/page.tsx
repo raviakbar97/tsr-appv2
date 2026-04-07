@@ -34,7 +34,6 @@ export default async function DashboardPage() {
   const totalOrders = orders.length;
   const totalRevenue = items.reduce((sum, i) => sum + Number(i.discounted_price) * i.quantity, 0);
 
-  // Fetch prices & fees — same approach as orders page
   const skuIds = [...new Set(items.map(i => i.sku_id).filter(Boolean))] as string[];
   const variationIds = [...new Set(items.map(i => i.variation_id).filter(Boolean))] as string[];
 
@@ -44,7 +43,6 @@ export default async function DashboardPage() {
     skuIds.length > 0 ? supabase.from("sku_fees").select("sku_id, value, max_value, fees(fee_type)").in("sku_id", skuIds) : Promise.resolve({ data: [] }),
   ]);
 
-  // Build lookup maps — identical to orders page
   const skuMap = new Map((skusPriceRes.data ?? []).map(s => [s.id, Number(s.base_price)]));
   const variationMap = new Map((variationPriceRes.data ?? []).map(v => [v.id, v.base_price_override]));
 
@@ -59,7 +57,6 @@ export default async function DashboardPage() {
     feesBySku.set(sf.sku_id, list);
   }
 
-  // Group items by order, enrich using shared logic, sum margins
   const itemsByOrder = new Map<string, typeof items>();
   for (const i of items) {
     const list = itemsByOrder.get(i.order_id) ?? [];
@@ -96,62 +93,62 @@ export default async function DashboardPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">Overview of your business</p>
+        <h1 className="text-2xl font-bold text-[var(--foreground)]">Dashboard</h1>
+        <p className="text-sm text-[var(--foreground-secondary)] mt-1">Overview of your business</p>
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <div className="bg-[var(--surface)] rounded-xl border border-[var(--border)] p-4 md:p-5 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all duration-[var(--transition-fast)]">
           <div className="flex items-center gap-2 mb-3">
-            <div className="p-1.5 bg-blue-50 rounded-lg"><ShoppingCart size={16} className="text-blue-600" /></div>
-            <span className="text-xs font-medium text-gray-500">Orders</span>
+            <div className="p-1.5 bg-[var(--primary-light)] rounded-lg"><ShoppingCart size={16} className="text-[var(--primary)]" /></div>
+            <span className="text-xs font-medium text-[var(--foreground-secondary)]">Orders</span>
           </div>
-          <p className="text-2xl font-bold text-gray-900">{totalOrders}</p>
-          <p className="text-xs text-gray-500 mt-0.5">{items.length} items</p>
+          <p className="text-xl md:text-2xl font-bold text-[var(--foreground)]">{totalOrders}</p>
+          <p className="text-xs text-[var(--muted)] mt-0.5">{items.length} items</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="bg-[var(--surface)] rounded-xl border border-[var(--border)] p-4 md:p-5 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all duration-[var(--transition-fast)]">
           <div className="flex items-center gap-2 mb-3">
-            <div className="p-1.5 bg-green-50 rounded-lg"><Package size={16} className="text-green-600" /></div>
-            <span className="text-xs font-medium text-gray-500">SKUs</span>
+            <div className="p-1.5 bg-[var(--accent-light)] rounded-lg"><Package size={16} className="text-[var(--accent)]" /></div>
+            <span className="text-xs font-medium text-[var(--foreground-secondary)]">SKUs</span>
           </div>
-          <p className="text-2xl font-bold text-gray-900">{skuCount}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Products</p>
+          <p className="text-xl md:text-2xl font-bold text-[var(--foreground)]">{skuCount}</p>
+          <p className="text-xs text-[var(--muted)] mt-0.5">Products</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="bg-[var(--surface)] rounded-xl border border-[var(--border)] p-4 md:p-5 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all duration-[var(--transition-fast)]">
           <div className="flex items-center gap-2 mb-3">
-            <div className="p-1.5 bg-yellow-50 rounded-lg"><DollarSign size={16} className="text-yellow-600" /></div>
-            <span className="text-xs font-medium text-gray-500">Revenue</span>
+            <div className="p-1.5 bg-[var(--warning-light)] rounded-lg"><DollarSign size={16} className="text-[var(--warning)]" /></div>
+            <span className="text-xs font-medium text-[var(--foreground-secondary)]">Revenue</span>
           </div>
-          <p className="text-2xl font-bold text-gray-900">{fmt(totalRevenue)}</p>
-          <p className="text-xs text-gray-500 mt-0.5">From {totalOrders} orders</p>
+          <p className="text-xl md:text-2xl font-bold text-[var(--foreground)]">{fmt(totalRevenue)}</p>
+          <p className="text-xs text-[var(--muted)] mt-0.5">From {totalOrders} orders</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="bg-[var(--surface)] rounded-xl border border-[var(--border)] p-4 md:p-5 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all duration-[var(--transition-fast)]">
           <div className="flex items-center gap-2 mb-3">
-            <div className="p-1.5 bg-purple-50 rounded-lg"><TrendingUp size={16} className="text-purple-600" /></div>
-            <span className="text-xs font-medium text-gray-500">Profit</span>
+            <div className="p-1.5 bg-[var(--primary-light)] rounded-lg"><TrendingUp size={16} className="text-[var(--primary)]" /></div>
+            <span className="text-xs font-medium text-[var(--foreground-secondary)]">Profit</span>
           </div>
-          <p className={`text-2xl font-bold ${totalProfit >= 0 ? "text-green-700" : "text-red-600"}`}>
+          <p className={`text-xl md:text-2xl font-bold ${totalProfit >= 0 ? "text-[var(--accent)]" : "text-[var(--danger)]"}`}>
             {profitKnown > 0 ? fmt(totalProfit) : "—"}
           </p>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="text-xs text-[var(--muted)] mt-0.5">
             {profitKnown > 0 ? `${profitKnown} items tracked` : "Set base prices"}
           </p>
         </div>
       </div>
 
       {/* Recent Orders */}
-      <div className="mt-6 bg-white rounded-xl border border-gray-200 p-6">
+      <div className="mt-6 bg-[var(--surface)] rounded-xl border border-[var(--border)] p-4 md:p-6 shadow-[var(--shadow-sm)]">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-gray-900">Recent Orders</h2>
-          <Link href="/dashboard/orders" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+          <h2 className="text-base font-semibold text-[var(--foreground)]">Recent Orders</h2>
+          <Link href="/dashboard/orders" className="text-sm text-[var(--primary)] hover:text-[var(--primary-hover)] flex items-center gap-1 transition-colors duration-[var(--transition-fast)]">
             View all <ArrowUpRight size={14} />
           </Link>
         </div>
         {recentOrders.length === 0 ? (
-          <p className="text-sm text-gray-500">No orders yet. Import your Shopee data to get started.</p>
+          <p className="text-sm text-[var(--foreground-secondary)]">No orders yet. Import your Shopee data to get started.</p>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-1">
             {recentOrders.map((o) => {
               const oItems = itemsByOrder.get(o.id) ?? [];
               const itemCount = oItems.reduce((s, i) => s + i.quantity, 0);
@@ -161,15 +158,15 @@ export default async function DashboardPage() {
                 : `${oItems[0].product_name} + ${oItems.length - 1} more`;
 
               return (
-                <div key={o.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 border border-gray-100">
-                  <div className="flex items-center gap-4 min-w-0">
-                    <span className="text-xs text-gray-500 whitespace-nowrap">{formatDate(o.created_at)}</span>
+                <div key={o.id} className="flex items-center justify-between p-3 rounded-lg border border-transparent hover:border-[var(--border)] hover:bg-[var(--surface-hover)] transition-all duration-[var(--transition-fast)]">
+                  <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                    <span className="text-xs text-[var(--muted)] whitespace-nowrap hidden sm:block">{formatDate(o.created_at)}</span>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{productSummary}</p>
-                      <p className="text-xs text-gray-500">{o.order_number} · {itemCount} item{itemCount !== 1 ? "s" : ""}</p>
+                      <p className="text-sm font-medium text-[var(--foreground)] truncate">{productSummary}</p>
+                      <p className="text-xs text-[var(--muted)]">{o.order_number} · {itemCount} item{itemCount !== 1 ? "s" : ""}</p>
                     </div>
                   </div>
-                  <span className="text-sm font-semibold text-gray-900 whitespace-nowrap ml-4">{fmt(orderTotal)}</span>
+                  <span className="text-sm font-semibold text-[var(--foreground)] whitespace-nowrap ml-4">{fmt(orderTotal)}</span>
                 </div>
               );
             })}

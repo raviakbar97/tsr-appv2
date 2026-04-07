@@ -58,15 +58,19 @@ export async function createWarehouseItem(formData: {
     if (bomError) return { error: bomError.message }
   }
 
-  // Insert unit conversions
+  // Insert unit conversions (only factor > 1, base unit is implicit)
   if (formData.unit_conversions && formData.unit_conversions.length > 0) {
-    const convRows = formData.unit_conversions.map((c) => ({
-      warehouse_item_id: item.id,
-      unit_name: c.unit_name.trim(),
-      factor: c.factor,
-    }))
-    const { error: convError } = await supabase.from('warehouse_unit_conversions').insert(convRows)
-    if (convError) return { error: convError.message }
+    const convRows = formData.unit_conversions
+      .filter((c) => c.factor > 1)
+      .map((c) => ({
+        warehouse_item_id: item.id,
+        unit_name: c.unit_name.trim(),
+        factor: c.factor,
+      }))
+    if (convRows.length > 0) {
+      const { error: convError } = await supabase.from('warehouse_unit_conversions').insert(convRows)
+      if (convError) return { error: convError.message }
+    }
   }
 
   revalidatePath('/dashboard/inventory/warehouse')
@@ -120,13 +124,17 @@ export async function updateWarehouseItem(
   // Replace unit conversions
   await supabase.from('warehouse_unit_conversions').delete().eq('warehouse_item_id', id)
   if (formData.unit_conversions && formData.unit_conversions.length > 0) {
-    const convRows = formData.unit_conversions.map((c) => ({
-      warehouse_item_id: id,
-      unit_name: c.unit_name.trim(),
-      factor: c.factor,
-    }))
-    const { error: convError } = await supabase.from('warehouse_unit_conversions').insert(convRows)
-    if (convError) return { error: convError.message }
+    const convRows = formData.unit_conversions
+      .filter((c) => c.factor > 1)
+      .map((c) => ({
+        warehouse_item_id: id,
+        unit_name: c.unit_name.trim(),
+        factor: c.factor,
+      }))
+    if (convRows.length > 0) {
+      const { error: convError } = await supabase.from('warehouse_unit_conversions').insert(convRows)
+      if (convError) return { error: convError.message }
+    }
   }
 
   revalidatePath('/dashboard/inventory/warehouse')
