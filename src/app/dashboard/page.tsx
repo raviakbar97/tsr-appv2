@@ -8,6 +8,7 @@ import {
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { enrichOrderItems } from "@/lib/profit";
+import DashboardFilter from "@/components/dashboard/DashboardFilter";
 
 export const dynamic = "force-dynamic";
 
@@ -19,20 +20,116 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-export default async function DashboardPage() {
+// Generate billing periods (26th to 25th) from order dates
+// Shows all available periods, even if the current one is incomplete
+function generateBillingPeriods(
+  firstOrderDate: string | null,
+  lastOrderDate: string | null
+): Array<{ startDate: string; endDate: string; periodName: string }> {
+  if (!firstOrderDate || !lastOrderDate) return [];
+
+  const firstDate = new Date(firstOrderDate);
+  const lastDate = new Date(lastOrderDate);
+  const periods: Array<{ startDate: string; endDate: string; periodName: string }> = [];
+
+  // Start from the 26th of the month of the first order
+  // If first order is after the 26th, start from next month's 26th
+  let currentDate = new Date(firstDate);
+  if (currentDate.getDate() > 25) {
+    // First order is after 25th, start period from next month
+    currentDate.setMonth(currentDate.getMonth() + 1);
+  }
+  currentDate.setDate(26);
+
+  // Generate periods as long as the start date is within or before the last order date
+  while (currentDate <= lastDate) {
+    const startDate = new Date(currentDate);
+    const endDate = new Date(currentDate);
+    endDate.setMonth(endDate.getMonth() + 1);
+    endDate.setDate(25);
+
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
+    const periodName = `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+
+    periods.push({
+      startDate: startDateStr,
+      endDate: endDateStr,
+      periodName
+    });
+
+    // Move to next period
+    currentDate.setMonth(currentDate.getMonth() + 1);
+  }
+
+  return periods.reverse();
+}
+
+interface DashboardPageProps {
+  searchParams: Promise<{ filterType?: string; period?: string; start?: string; end?: string }>;
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const params = await searchParams;
+  const filterType = params.filterType || 'all';
+  const periodValue = params.period || '';
+  const customStart = params.start || '';
+  const customEnd = params.end || '';
+
   const supabase = await createClient();
 
+  // Build date filter
+  let startDate: string | null = null;
+  let endDate: string | null = null;
+
+  if (filterType === 'period' && periodValue) {
+    const [start, end] = periodValue.split('|');
+    startDate = start;
+    endDate = end + 'T23:59:59';
+  } else if (filterType === 'custom' && customStart && customEnd) {
+    startDate = customStart;
+    endDate = customEnd + 'T23:59:59';
+  }
+
+  // Fetch orders with optional date filter
+  // We need to filter by both paid_at (orders with payment date) and created_at (orders without)
+  let ordersQuery = supabase
+    .from("orders")
+    .select("id, order_number, order_status, created_at, paid_at")
+    .order("created_at", { ascending: false });
+
+  if (startDate && endDate) {
+    // Use a more reliable approach: filter in the query or post-process
+    // For Supabase, we'll use a combined filter
+    ordersQuery = supabase
+      .from("orders")
+      .select("id, order_number, order_status, created_at, paid_at")
+      .or(`and(paid_at.gte.${startDate},paid_at.lte.${endDate}),and(paid_at.is.null,created_at.gte.${startDate},created_at.lte.${endDate})`)
+      .order("created_at", { ascending: false });
+  }
+
   const [ordersRes, itemsRes, skusRes] = await Promise.all([
-    supabase.from("orders").select("id, order_number, order_status, created_at").order("created_at", { ascending: false }),
+    ordersQuery,
     supabase.from("order_items").select("id, order_id, sku_id, variation_id, product_name, discounted_price, quantity"),
     supabase.from("skus").select("id"),
   ]);
 
-  const orders = ordersRes.data ?? [];
-  const items = itemsRes.data ?? [];
+  const allOrders = ordersRes.data ?? [];
+  const allItems = itemsRes.data ?? [];
+
+  // Filter items to only include items from the filtered orders
+  const filteredOrderIds = new Set(allOrders.map(o => o.id));
+  const items = allItems.filter(i => filteredOrderIds.has(i.order_id));
+
+  const orders = allOrders;
   const skuCount = skusRes.data?.length ?? 0;
   const totalOrders = orders.length;
   const totalRevenue = items.reduce((sum, i) => sum + Number(i.discounted_price) * i.quantity, 0);
+
+  // Generate billing periods for the filter
+  const firstOrderDate = allOrders.length > 0 ? allOrders[allOrders.length - 1].created_at : null;
+  const lastOrderDate = allOrders.length > 0 ? allOrders[0].created_at : null;
+  const billingPeriods = generateBillingPeriods(firstOrderDate, lastOrderDate);
 
   const skuIds = [...new Set(items.map(i => i.sku_id).filter(Boolean))] as string[];
   const variationIds = [...new Set(items.map(i => i.variation_id).filter(Boolean))] as string[];
@@ -92,9 +189,14 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-[var(--foreground)]">Dashboard</h1>
-        <p className="text-sm text-[var(--foreground-secondary)] mt-1">Overview of your business</p>
+        <p className="text-sm text-[var(--muted)] mt-1">Overview of your business</p>
+      </div>
+
+      {/* Filter Bar */}
+      <div className="mb-6">
+        <DashboardFilter billingPeriods={billingPeriods} />
       </div>
 
       {/* Stat Cards */}
